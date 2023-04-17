@@ -11,7 +11,8 @@ import numpy as np
 import torch.nn.functional as F
 from tools.utils import l2norm
 from models.AudioEncoder import Cnn10, ResNet38, Cnn14
-from models.TextEncoder import BertEncoder, W2VEncoder
+from models.TextEncoder import BertEncoder #, W2VEncoder
+from models.SBertEncoder import SenBERTEncoder
 from models.BERT_Config import MODELS
 
 
@@ -39,9 +40,15 @@ class AudioEnc(nn.Module):
             for i in range(len(trained_list)):
                 dict_new[trained_list[i]] = pretrained_cnn[trained_list[i]]
             self.audio_enc.load_state_dict(dict_new)
+        
+        
         if config.training.freeze:
             for name, param in self.audio_enc.named_parameters():
                 param.requires_grad = False
+        else: 
+            for name, param in self.audio_enc.named_parameters():
+                param.requires_grad = True
+            
 
     def forward(self, inputs):
         audio_encoded = self.audio_enc(inputs)
@@ -87,6 +94,20 @@ class ASE(nn.Module):
                 nn.ReLU(),
                 nn.Linear(joint_embed, joint_embed)
             )
+            
+        elif config.text_encoder == 'sbert':
+            self.text_enc =  SenBERTEncoder(config)
+            self.text_linear = nn.Sequential(
+                nn.Linear(768 , joint_embed*2),
+                #nn.Linear(300, joint_embed),
+                nn.ReLU(),
+                nn.Linear(joint_embed*2, joint_embed)
+                #nn.Linear(768, joint_embed),
+                #nn.ReLU()
+                #nn.Linear(joint_embed, joint_embed)
+                
+            )
+
 
     def encode_audio(self, audios):
         return self.audio_enc(audios)
@@ -100,7 +121,6 @@ class ASE(nn.Module):
         caption_encoded = self.encode_text(captions)
 
         audio_embed = self.audio_linear(audio_encoded)
-
         caption_embed = self.text_linear(caption_encoded)
 
         if self.l2:

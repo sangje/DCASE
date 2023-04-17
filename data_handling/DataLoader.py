@@ -14,7 +14,7 @@ from torch.utils.data.dataloader import DataLoader
 
 class AudioCaptionDataset(Dataset):
 
-    def __init__(self, dataset='AudioCaps', split='train'):
+    def __init__(self, dataset='Clotho', split='train'):
         """
         load audio clip's waveform and corresponding caption
         Args:
@@ -32,7 +32,7 @@ class AudioCaptionDataset(Dataset):
                 self.audio_keys = [audio_name.decode() for audio_name in hf['audio_name'][:]]
                 # audio_names: [str]
                 self.captions = [caption.decode() for caption in hf['caption'][:]]
-        else:
+        else: #'Clotho'
             self.is_train = False
             self.num_captions_per_audio = 5
             with h5py.File(self.h5_path, 'r') as hf:

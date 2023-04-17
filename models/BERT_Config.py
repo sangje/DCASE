@@ -6,6 +6,9 @@
 from transformers import BertModel, BertTokenizer, GPT2Model, GPT2Tokenizer,\
     RobertaModel, RobertaTokenizer, DistilBertModel, DistilBertTokenizer,\
     CLIPTokenizer, CLIPTextModel
+from sentence_transformers import SentenceTransformer
+from transformers import AutoTokenizer, AutoModel
+
 
 MODELS = {
     'openai/clip-vit-base-patch32': (CLIPTextModel, CLIPTokenizer, 512),
@@ -21,4 +24,5 @@ MODELS = {
     'roberta-large': (RobertaModel, RobertaTokenizer, 1024),
     'distilbert-base-uncased': (DistilBertModel, DistilBertTokenizer, 768),
     "distilroberta-base": (RobertaModel, RobertaTokenizer, 768),
+    #'sentence-transformers/all-MiniLM-L6-v2': (SentenceTransformer, SentenceBertTokenizer, 768)
 }

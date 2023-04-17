@@ -1,8 +1,3 @@
-#!/usr/bin/env python3
-# coding: utf-8
-# @Author  : Xinhao Mei @CVSSP, University of Surrey
-# @E-mail  : x.mei@surrey.ac.uk
-
 import platform
 import sys
 import time
@@ -14,7 +9,10 @@ from loguru import logger
 from pprint import PrettyPrinter
 from torch.utils.tensorboard import SummaryWriter
 from tools.utils import setup_seed, AverageMeter, a2t, t2a
-from tools.loss import BiDirectionalRankingLoss, TripletLoss, NTXent, WeightTriplet
+from tools.loss import BiDirectionalRankingLoss, TripletLoss, NTXent
+from tools.info_loss import InFoNCELoss
+
+
 from models.ASE_model import ASE
 from data_handling.DataLoader import get_dataloader
 
@@ -68,14 +66,22 @@ def train(config):
     # set up optimizer and loss
     optimizer = torch.optim.Adam(params=model.parameters(), lr=config.training.lr)
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.1)
+    
     if config.training.loss == 'triplet':
         criterion = TripletLoss(margin=config.training.margin)
+    
     elif config.training.loss == 'ntxent':
         criterion = NTXent()
+    
     elif config.training.loss == 'weight':
         criterion = WeightTriplet(margin=config.training.margin)
-    else:
+        
+    elif config.training.loss == 'infonce':
+        criterion = InFoNCELoss()
+        
+    else: #config.training.loss == 'bidirect': 'contrastive'??
         criterion = BiDirectionalRankingLoss(margin=config.training.margin)
+    
 
     # set up data loaders
     train_loader = get_dataloader('train', config)
@@ -133,14 +139,15 @@ def train(config):
 
         # validation loop, validation after each epoch
         main_logger.info("Validating...")
-        r1, r5, r10, r50, medr, meanr = validate(val_loader, model, device)
+        r1, r5, r10, mAP10, medr, meanr = validate(val_loader, model, device)
         r_sum = r1 + r5 + r10
         recall_sum.append(r_sum)
 
         writer.add_scalar('val/r@1', r1, epoch)
         writer.add_scalar('val/r@5', r5, epoch)
         writer.add_scalar('val/r@10', r10, epoch)
-        writer.add_scalar('val/r@50', r50, epoch)
+        #writer.add_scalar('val/r@50', r50, epoch)
+        writer.add_scalar('val/mAP10', mAP10, epoch)
         writer.add_scalar('val/med@r', medr, epoch)
         writer.add_scalar('val/mean@r', meanr, epoch)
 
@@ -189,18 +196,18 @@ def validate(data_loader, model, device):
             cap_embs[indexs] = caption_embeds.cpu().numpy()
 
         # evaluate text to audio retrieval
-        r1, r5, r10, r50, medr, meanr = t2a(audio_embs, cap_embs)
+        r1, r5, r10, mAP10, medr, meanr = t2a(audio_embs, cap_embs)
 
         val_logger.info('Caption to audio: r1: {:.2f}, r5: {:.2f}, '
-                        'r10: {:.2f}, r50: {:.2f}, medr: {:.2f}, meanr: {:.2f}'.format(
-                         r1, r5, r10, r50, medr, meanr))
+                        'r10: {:.2f}, mAP10: {:.2f}, medr: {:.2f}, meanr: {:.2f}'.format(
+                         r1, r5, r10, mAP10, medr, meanr))
 
         # evaluate audio to text retrieval
-        r1_a, r5_a, r10_a, r50_a, medr_a, meanr_a = a2t(audio_embs, cap_embs)
+        r1_a, r5_a, r10_a, mAP10_a, medr_a, meanr_a = a2t(audio_embs, cap_embs)
 
         val_logger.info('Audio to caption: r1: {:.2f}, r5: {:.2f}, '
-                        'r10: {:.2f}, r50: {:.2f}, medr: {:.2f}, meanr: {:.2f}'.format(
-                         r1_a, r5_a, r10_a, r50_a, medr_a, meanr_a))
+                        'r10: {:.2f}, mAP10: {:.2f}, medr: {:.2f}, meanr: {:.2f}'.format(
+                         r1_a, r5_a, r10_a, mAP10_a, medr_a, meanr_a))
 
-        return r1, r5, r10, r50, medr, meanr
+        return r1, r5, r10, mAP10, medr, meanr
 
