@@ -10,7 +10,7 @@ import torch.nn as nn
 import numpy as np
 import torch.nn.functional as F
 from tools.utils import l2norm
-from models.AudioEncoder import Cnn10, ResNet38, Cnn14
+from models.AudioEncoder import Cnn10, ResNet38, Cnn14, Wavegram_Logmel_Cnn14
 from models.TextEncoder import BertEncoder #, W2VEncoder
 from models.SBertEncoder import SenBERTEncoder
 from models.BERT_Config import MODELS
@@ -27,6 +27,9 @@ class AudioEnc(nn.Module):
             self.audio_enc = ResNet38(config)
         elif config.cnn_encoder.model == 'Cnn14':
             self.audio_enc = Cnn14(config)
+        elif config.cnn_encoder.model == 'Wavegram_Logmel_Cnn14':
+            self.audio_enc = Wavegram_Logmel_Cnn14(config)    
+            
         else:
             raise NotImplementedError('No such audio encoder network.')
 
@@ -45,10 +48,17 @@ class AudioEnc(nn.Module):
         if config.training.freeze:
             for name, param in self.audio_enc.named_parameters():
                 param.requires_grad = False
-        else: 
-            for name, param in self.audio_enc.named_parameters():
-                param.requires_grad = True
-            
+        
+#         for name, param in self.audio_enc.named_parameters(): 
+#                 if name.startswith('audio_enc.fc1'):
+#                     param.requires_grad=True
+#                 elif (name.startswith('audio_enc.conv_block6') or name.startswith('audio_enc.conv_block5') 
+#                       or name.startswith('audio_enc.conv_block4') or name.startswith('audio_enc.conv_block4')):
+#                     param.requires_grad=True
+#                 else:
+#                     param.requires_grad=False
+        
+   
 
     def forward(self, inputs):
         audio_encoded = self.audio_enc(inputs)
@@ -77,6 +87,14 @@ class ASE(nn.Module):
                 nn.ReLU(),
                 nn.Linear(joint_embed * 2, joint_embed)
             )
+            
+        elif config.cnn_encoder.model == 'Wavegram_Logmel_Cnn14':
+            self.audio_linear = nn.Sequential(
+                nn.Linear(2048, joint_embed * 2),
+                nn.ReLU(),
+                nn.Linear(joint_embed * 2, joint_embed)
+            )
+            
 
         # self.audio_gated_linear = nn.Linear(joint_embed, joint_embed)
         if config.text_encoder == 'bert':
