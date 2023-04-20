@@ -135,15 +135,13 @@ def train(config):
 
         elapsed_time = time.time() - start_time
 
-        main_logger.info(f'Training statistics:\tloss for epoch [{epoch}]: {epoch_loss.avg:.3f},'
-                         f'\ttime: {elapsed_time:.1f}, lr: {scheduler.get_last_lr()[0]:.6f}.')
-
         # validation loop, validation after each epoch
         main_logger.info("Validating...")
-        r1, r5, r10, mAP10, medr, meanr = validate(val_loader, model, device)
+        r1, r5, r10, mAP10, medr, meanr, val_loss = validate(val_loader, model, device, criterion=criterion)
         r_sum = r1 + r5 + r10
         recall_sum.append(r_sum)
 
+        writer.add_scalar('val/loss', val_loss, epoch)
         writer.add_scalar('val/r@1', r1, epoch)
         writer.add_scalar('val/r@5', r5, epoch)
         writer.add_scalar('val/r@10', r10, epoch)
@@ -161,7 +159,10 @@ def train(config):
                 'epoch': epoch,
             }, str(model_output_dir) + '/best_model.pth')
 
-        scheduler.step()
+        scheduler.step(val_loss)
+        current_lr = optimizer.param_groups[0]['lr']
+        main_logger.info(f'Training statistics:\tloss for epoch [{epoch}]: {epoch_loss.avg:.3f},'
+                         f'\ttime: {elapsed_time:.1f}, lr: {current_lr:.6f}.')
 
     # Training done, evaluate on evaluation set
     main_logger.info('Training done. Start evaluating.')
@@ -174,10 +175,11 @@ def train(config):
     writer.close()
 
 
-def validate(data_loader, model, device):
+def validate(data_loader, model, device, criterion=None):
 
     val_logger = logger.bind(indent=1)
     model.eval()
+    epoch_loss = AverageMeter()
     with torch.no_grad():
         # numpy array to keep all embeddings in the dataset
         audio_embs, cap_embs = None, None
@@ -192,6 +194,11 @@ def validate(data_loader, model, device):
             if audio_embs is None:
                 audio_embs = np.zeros((len(data_loader.dataset), audio_embeds.size(1)))
                 cap_embs = np.zeros((len(data_loader.dataset), caption_embeds.size(1)))
+
+            # Code for validation loss
+            if criterion!=None:
+                loss = criterion(audio_embeds, caption_embeds, audio_ids)
+            epoch_loss.update(loss.cpu().item())
 
             audio_embs[indexs] = audio_embeds.cpu().numpy()
             cap_embs[indexs] = caption_embeds.cpu().numpy()
@@ -210,5 +217,5 @@ def validate(data_loader, model, device):
                         'r10: {:.2f}, mAP10: {:.2f}, medr: {:.2f}, meanr: {:.2f}'.format(
                          r1_a, r5_a, r10_a, mAP10_a, medr_a, meanr_a))
 
-        return r1, r5, r10, mAP10, medr, meanr
+        return r1, r5, r10, mAP10, medr, meanr, epoch_loss.avg
 
