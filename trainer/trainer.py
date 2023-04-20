@@ -25,11 +25,16 @@ def train(config):
     # set up logger
     exp_name = config.exp_name
 
-    folder_name = '{}_data_{}_freeze_{}_lr_{}_' \
-                  'margin_{}_seed_{}'.format(exp_name, config.dataset,
-                                             str(config.training.freeze),
+    # folder_name = '{}_data_{}_freeze_{}_lr_{}_' \
+    #               'margin_{}_seed_{}'.format(exp_name, config.dataset,
+    #                                          str(config.training.freeze),
+    #                                          config.training.lr,
+    #                                          config.training.margin,
+    #                                          config.training.seed)
+    
+    folder_name = '{}_freeze_{}_lr_{}_' \
+                  'seed_{}'.format(exp_name, str(config.training.freeze),
                                              config.training.lr,
-                                             config.training.margin,
                                              config.training.seed)
 
     log_output_dir = Path('outputs', folder_name, 'logging')
@@ -92,6 +97,7 @@ def train(config):
     main_logger.info(f'Size of training set: {len(train_loader.dataset)}, size of batches: {len(train_loader)}')
     main_logger.info(f'Size of validation set: {len(val_loader.dataset)}, size of batches: {len(val_loader)}')
     main_logger.info(f'Size of test set: {len(test_loader.dataset)}, size of batches: {len(test_loader)}')
+    main_logger.info(f'Total parameters: {sum([i.numel() for i in model.parameters()])}')
 
     ep = 1
 
@@ -157,6 +163,7 @@ def train(config):
                 'model': model.state_dict(),
                 'optimizer': model.state_dict(),
                 'epoch': epoch,
+                'config': config
             }, str(model_output_dir) + '/best_model.pth')
 
         scheduler.step(val_loss)
@@ -174,7 +181,7 @@ def train(config):
     main_logger.info('Evaluation done.')
     writer.close()
 
-
+@torch.no_grad()
 def validate(data_loader, model, device, criterion=None):
 
     val_logger = logger.bind(indent=1)
@@ -198,17 +205,19 @@ def validate(data_loader, model, device, criterion=None):
             # Code for validation loss
             if criterion!=None:
                 loss = criterion(audio_embeds, caption_embeds, audio_ids)
-            epoch_loss.update(loss.cpu().item())
+                epoch_loss.update(loss.cpu().item())
 
             audio_embs[indexs] = audio_embeds.cpu().numpy()
             cap_embs[indexs] = caption_embeds.cpu().numpy()
 
+        val_logger.info(f'Validation loss: {epoch_loss.avg :.3f}')
         # evaluate text to audio retrieval
         r1, r5, r10, mAP10, medr, meanr = t2a(audio_embs, cap_embs)
 
         val_logger.info('Caption to audio: r1: {:.2f}, r5: {:.2f}, '
                         'r10: {:.2f}, mAP10: {:.2f}, medr: {:.2f}, meanr: {:.2f}'.format(
                          r1, r5, r10, mAP10, medr, meanr))
+        
 
         # evaluate audio to text retrieval
         r1_a, r5_a, r10_a, mAP10_a, medr_a, meanr_a = a2t(audio_embs, cap_embs)
