@@ -31,6 +31,8 @@ if __name__ == '__main__':
                         help='Margin value for loss')
     parser.add_argument('-s', '--seed', default=20, type=int,
                         help='Training seed')
+    parser.add_argument('-p', '--epochs',default=50, type=int,
+                        help='Epoch')
 
     args = parser.parse_args()
 
@@ -44,4 +46,6 @@ if __name__ == '__main__':
     config.data.batch_size = args.batch
     config.training.margin = args.margin
     config.training.seed = args.seed
+    config.training.epochs = args.epochs
+    
     train(config)
