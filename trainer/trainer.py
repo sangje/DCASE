@@ -24,13 +24,6 @@ def train(config):
 
     # set up logger
     exp_name = config.exp_name
-
-    # folder_name = '{}_data_{}_freeze_{}_lr_{}_' \
-    #               'margin_{}_seed_{}'.format(exp_name, config.dataset,
-    #                                          str(config.training.freeze),
-    #                                          config.training.lr,
-    #                                          config.training.margin,
-    #                                          config.training.seed)
     
     folder_name = '{}_freeze_{}_lr_{}_' \
                   'seed_{}'.format(exp_name, str(config.training.freeze),
