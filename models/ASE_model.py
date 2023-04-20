@@ -48,15 +48,16 @@ class AudioEnc(nn.Module):
         if config.training.freeze:
             for name, param in self.audio_enc.named_parameters():
                 param.requires_grad = False
-        
-#         for name, param in self.audio_enc.named_parameters(): 
-#                 if name.startswith('audio_enc.fc1'):
-#                     param.requires_grad=True
-#                 elif (name.startswith('audio_enc.conv_block6') or name.startswith('audio_enc.conv_block5') 
-#                       or name.startswith('audio_enc.conv_block4') or name.startswith('audio_enc.conv_block4')):
-#                     param.requires_grad=True
-#                 else:
-#                     param.requires_grad=False
+                
+        else:
+            for name, param in self.audio_enc.named_parameters(): 
+                if name.startswith('audio_enc.fc1'):
+                    param.requires_grad=True
+                elif (name.startswith('audio_enc.conv_block6') or name.startswith('audio_enc.conv_block5') 
+                      or name.startswith('audio_enc.conv_block4') or name.startswith('audio_enc.conv_block4')):
+                    param.requires_grad=True
+                else:
+                    param.requires_grad=False
         
    
 
