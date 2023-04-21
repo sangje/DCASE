@@ -29,7 +29,7 @@ class InFoNCELoss(nn.Module):
         a2t = util.cos_sim(audio_embeds, text_embeds) / self.tau
         t2a = util.cos_sim(text_embeds, audio_embeds) / self.tau
         
-        labels = (np.ones((n, n)) - np.eye(n)).to(a2t.device)
+        labels = torch.tensor(np.ones((n, n)) - np.eye(n)).to(a2t.device)
         
         a2t_loss = self.loss(a2t, labels)
         t2a_loss = self.loss(t2a, labels)
