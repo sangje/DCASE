@@ -23,18 +23,20 @@ class InFoNCELoss(nn.Module):
         :return:
         """
         
+        loss = torch.tensor(0., device=audio_embeds.device, requires_grad=True)
+
         n = audio_embeds.size(0) # 배치 사이즈
               
         
         a2t = util.cos_sim(audio_embeds, text_embeds) / self.tau
         t2a = util.cos_sim(text_embeds, audio_embeds) / self.tau
         
-        labels = torch.tensor(np.ones((n, n)) - np.eye(n)).to(a2t.device)
+        labels = torch.tensor(np.eye(n)).to(a2t.device)
         
         a2t_loss = self.loss(a2t, labels)
         t2a_loss = self.loss(t2a, labels)
         
-        loss = (a2t_loss + t2a_loss)/2
+        loss = loss + (a2t_loss + t2a_loss)/2
         
         return loss
     
