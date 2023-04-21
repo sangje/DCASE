@@ -64,7 +64,7 @@ def train(config):
     # set up optimizer and loss
     optimizer = torch.optim.Adam(params=model.parameters(), lr=config.training.lr)
     #scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.1)
-    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer,'min',factor=0.1,patience=5,threshold=0.005,threshold_mode='abs',min_lr=0.000001,verbose=True)
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer,'min',factor=0.5,patience=5,threshold=0.005,threshold_mode='abs',min_lr=0.000001,verbose=True)
 
     if config.training.loss == 'triplet':
         criterion = TripletLoss(margin=config.training.margin)
