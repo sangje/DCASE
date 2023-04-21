@@ -147,7 +147,7 @@ def train(config):
         #writer.add_scalar('val/r@50', r50, epoch)
         writer.add_scalar('val/mAP10', mAP10, epoch)
         writer.add_scalar('val/med@r', medr, epoch)
-        writer.add_scalar('val/mean@r', meanr, epoch)
+        writer.add_scalar('val/mean@r', meanr, epoch) 
 
         # save model
         if r_sum >= max(recall_sum):
@@ -179,7 +179,7 @@ def validate(data_loader, model, device, criterion=None):
 
     val_logger = logger.bind(indent=1)
     model.eval()
-    epoch_loss = AverageMeter()
+    val_loss = AverageMeter()
     with torch.no_grad():
         # numpy array to keep all embeddings in the dataset
         audio_embs, cap_embs = None, None
@@ -198,12 +198,12 @@ def validate(data_loader, model, device, criterion=None):
             # Code for validation loss
             if criterion!=None:
                 loss = criterion(audio_embeds, caption_embeds, audio_ids)
-                epoch_loss.update(loss.cpu().item())
+                val_loss.update(loss.cpu().item())
 
             audio_embs[indexs] = audio_embeds.cpu().numpy()
             cap_embs[indexs] = caption_embeds.cpu().numpy()
 
-        val_logger.info(f'Validation loss: {epoch_loss.avg :.3f}')
+        val_logger.info(f'Validation loss: {val_loss.avg :.3f}')
         # evaluate text to audio retrieval
         r1, r5, r10, mAP10, medr, meanr = t2a(audio_embs, cap_embs)
 
@@ -219,5 +219,5 @@ def validate(data_loader, model, device, criterion=None):
                         'r10: {:.2f}, mAP10: {:.2f}, medr: {:.2f}, meanr: {:.2f}'.format(
                          r1_a, r5_a, r10_a, mAP10_a, medr_a, meanr_a))
 
-        return r1, r5, r10, mAP10, medr, meanr, epoch_loss.avg
+        return r1, r5, r10, mAP10, medr, meanr, val_loss.avg
 
