@@ -27,9 +27,9 @@ class InFoNCELoss(nn.Module):
 
         n = audio_embeds.size(0) # 배치 사이즈
               
-        
-        a2t = util.cos_sim(audio_embeds, text_embeds) / self.tau
-        t2a = util.cos_sim(text_embeds, audio_embeds) / self.tau
+        # Similarity range = [0,1]
+        a2t = abs(util.cos_sim(audio_embeds, text_embeds) / self.tau)
+        t2a = abs(util.cos_sim(text_embeds, audio_embeds) / self.tau)
         
         labels = torch.tensor(np.eye(n)).to(a2t.device)
         
