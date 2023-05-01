@@ -53,10 +53,14 @@ def train(config):
                      f'{printer.pformat(config)}')
 
     # set up model
-    device, device_name = ('cuda',
-                           torch.cuda.get_device_name(torch.cuda.current_device())) \
-        if torch.cuda.is_available() else ('cpu', platform.processor())
-    main_logger.info(f'Process on {device_name}')
+    if torch.cuda.is_available():
+        device, device_name = ('cuda',torch.cuda.get_device_name(torch.cuda.current_device()))
+    # elif torch.backends.mps.is_available():
+    #     device, device_name = ('mps',platform.processor()) 
+    else: 
+        device, device_name = (torch.device('cpu'), platform.processor())
+
+    main_logger.info(f'Process on {device}:{device_name}')
 
     model = ASE(config)
     model = model.to(device)
