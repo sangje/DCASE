@@ -203,8 +203,8 @@ def validate(data_loader, model, device, criterion=None, return_ranks=False, csv
                 audio_embs = np.zeros((len(data_loader.dataset), audio_embeds.size(1)))
                 cap_embs = np.zeros((len(data_loader.dataset), caption_embeds.size(1)))
                 if return_ranks:
-                    audio_names_ = np.array(['                                          ' for i in range(len(data_loader.dataset))])
-                    caption_names = np.array(['                                                                            ' for i in range(len(data_loader.dataset))])
+                    audio_names_ = np.array(['                                                               ' for i in range(len(data_loader.dataset))])
+                    caption_names = np.array(['                                                                                                        ' for i in range(len(data_loader.dataset))])
 
             # Code for validation loss
             if criterion!=None:
