@@ -220,8 +220,9 @@ def validate(data_loader, model, device, criterion=None, return_ranks=False, csv
         val_logger.info(f'Validation loss: {val_loss.avg :.3f}')
         # evaluate text to audio retrieval
         if return_ranks:
-            r1, r5, r10, mAP10, medr, meanr, ranks, top5 = t2a(audio_embs, cap_embs, return_ranks=True)
-            make_csv(caption_names, audio_names_, top5, csv_output_dir=csv_output_dir)
+            r1, r5, r10, mAP10, medr, meanr, ranks, top10 = t2a(audio_embs, cap_embs, return_ranks=True)
+            make_csv(caption_names, audio_names_, top10, csv_output_dir=csv_output_dir)
+            val_logger.info('CSV File was completly made at {}!'.format(csv_output_dir))
         else:
             r1, r5, r10, mAP10, medr, meanr = t2a(audio_embs, cap_embs)
 
