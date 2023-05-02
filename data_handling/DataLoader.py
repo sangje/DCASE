@@ -61,7 +61,7 @@ class AudioCaptionDataset(Dataset):
 
         if self.dataset == 'Clotho':
             length = self.audio_lengths[audio_idx]
-            return waveform, caption, audio_idx, length, index
+            return waveform, caption, audio_idx, length, index, audio_name
         else:
             return waveform, caption, audio_idx, len(waveform), index
 
@@ -91,8 +91,9 @@ def collate_fn(batch_data):
     captions = [i[1] for i in batch_data]
     audio_ids = torch.Tensor([i[2] for i in batch_data])
     indexs = np.array([i[4] for i in batch_data])
+    audio_names = [i[5] for i in batch_data]
 
-    return wavs_tensor, captions, audio_ids, indexs
+    return wavs_tensor, captions, audio_ids, indexs, audio_names
 
 
 def get_dataloader(split, config):
