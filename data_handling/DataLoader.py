@@ -79,7 +79,7 @@ def collate_fn(batch_data):
     max_audio_length = max([i[3] for i in batch_data])
 
     wav_tensor = []
-    for waveform, _, _, _, _ in batch_data:
+    for waveform, _, _, _, _, _ in batch_data:
         if max_audio_length > waveform.shape[0]:
             padding = torch.zeros(max_audio_length - waveform.shape[0]).float()
             temp_audio = torch.cat([torch.from_numpy(waveform).float(), padding])
