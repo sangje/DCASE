@@ -11,6 +11,7 @@ from torch.utils.tensorboard import SummaryWriter
 from tools.utils import setup_seed, AverageMeter, a2t, t2a
 from tools.loss import BiDirectionalRankingLoss, TripletLoss, NTXent
 from tools.info_loss import InFoNCELoss
+from tools.make_csvfile import make_csv
 
 
 from models.ASE_model import ASE
@@ -34,7 +35,10 @@ def train(config):
     model_output_dir = Path('outputs', folder_name, 'models')
     log_output_dir.mkdir(parents=True, exist_ok=True)
     model_output_dir.mkdir(parents=True, exist_ok=True)
-
+    if config.training.csv:
+        csv_output_dir = Path('outputs', folder_name, 'csv')
+        csv_output_dir.mkdir(parents=True, exist_ok=True)
+   
     logger.remove()
 
     logger.add(sys.stdout, format='{time: YYYY-MM-DD at HH:mm:ss} | {message}', level='INFO',
@@ -58,7 +62,7 @@ def train(config):
     # elif torch.backends.mps.is_available():
     #     device, device_name = ('mps',platform.processor()) 
     else: 
-        device, device_name = (torch.device('cpu'), platform.processor())
+        device, device_name = ('cpu', platform.processor())
 
     main_logger.info(f'Process on {device}:{device_name}')
 
@@ -117,7 +121,7 @@ def train(config):
 
         for batch_id, batch_data in tqdm(enumerate(train_loader), total=len(train_loader)):
 
-            audios, captions, audio_ids, _ = batch_data
+            audios, captions, audio_ids, _, _ = batch_data
 
             # move data to GPU
             audios = audios.to(device)
@@ -174,22 +178,22 @@ def train(config):
     model.load_state_dict(best_checkpoint['model'])
     best_epoch = best_checkpoint['epoch']
     main_logger.info(f'Best checkpoint occurred in {best_epoch} th epoch.')
-    validate(test_loader, model, device)
+    validate(test_loader, model, device, criterion=criterion, return_ranks=config.training.csv, csv_output_dir=csv_output_dir)
     main_logger.info('Evaluation done.')
     writer.close()
 
 @torch.no_grad()
-def validate(data_loader, model, device, criterion=None):
+def validate(data_loader, model, device, criterion=None, return_ranks=False, csv_output_dir=None):
 
     val_logger = logger.bind(indent=1)
     model.eval()
     val_loss = AverageMeter()
     with torch.no_grad():
         # numpy array to keep all embeddings in the dataset
-        audio_embs, cap_embs = None, None
+        audio_embs, cap_embs , audio_names_ = None, None, None
 
         for i, batch_data in tqdm(enumerate(data_loader), total=len(data_loader)):
-            audios, captions, audio_ids, indexs = batch_data
+            audios, captions, audio_ids, indexs, audio_names = batch_data
             # move data to GPU
             audios = audios.to(device)
 
@@ -198,6 +202,8 @@ def validate(data_loader, model, device, criterion=None):
             if audio_embs is None:
                 audio_embs = np.zeros((len(data_loader.dataset), audio_embeds.size(1)))
                 cap_embs = np.zeros((len(data_loader.dataset), caption_embeds.size(1)))
+                if return_ranks:
+                    audio_names_ = np.array(['                                          ' for i in range(len(data_loader.dataset))])
 
             # Code for validation loss
             if criterion!=None:
@@ -206,10 +212,16 @@ def validate(data_loader, model, device, criterion=None):
 
             audio_embs[indexs] = audio_embeds.cpu().numpy()
             cap_embs[indexs] = caption_embeds.cpu().numpy()
+            if return_ranks:
+                audio_names_[indexs] = np.array(audio_names)
 
         val_logger.info(f'Validation loss: {val_loss.avg :.3f}')
         # evaluate text to audio retrieval
-        r1, r5, r10, mAP10, medr, meanr = t2a(audio_embs, cap_embs)
+        if return_ranks:
+            r1, r5, r10, mAP10, medr, meanr, ranks, top5 = t2a(audio_embs, cap_embs, return_ranks=True)
+            make_csv(audio_names_, top5, csv_output_dir=csv_output_dir)
+        else:
+            r1, r5, r10, mAP10, medr, meanr = t2a(audio_embs, cap_embs)
 
         val_logger.info('Caption to audio: r1: {:.2f}, r5: {:.2f}, '
                         'r10: {:.2f}, mAP10: {:.2f}, medr: {:.2f}, meanr: {:.2f}'.format(
@@ -224,4 +236,3 @@ def validate(data_loader, model, device, criterion=None):
                          r1_a, r5_a, r10_a, mAP10_a, medr_a, meanr_a))
 
         return r1, r5, r10, mAP10, medr, meanr, val_loss.avg
-
