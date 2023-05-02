@@ -190,7 +190,7 @@ def validate(data_loader, model, device, criterion=None, return_ranks=False, csv
     val_loss = AverageMeter()
     with torch.no_grad():
         # numpy array to keep all embeddings in the dataset
-        audio_embs, cap_embs , audio_names_ = None, None, None
+        audio_embs, cap_embs , audio_names_, caption_names= None, None, None, None
 
         for i, batch_data in tqdm(enumerate(data_loader), total=len(data_loader)):
             audios, captions, audio_ids, indexs, audio_names = batch_data
@@ -204,6 +204,7 @@ def validate(data_loader, model, device, criterion=None, return_ranks=False, csv
                 cap_embs = np.zeros((len(data_loader.dataset), caption_embeds.size(1)))
                 if return_ranks:
                     audio_names_ = np.array(['                                          ' for i in range(len(data_loader.dataset))])
+                    caption_names = np.array(['                                                                            ' for i in range(len(data_loader.dataset))])
 
             # Code for validation loss
             if criterion!=None:
@@ -214,12 +215,13 @@ def validate(data_loader, model, device, criterion=None, return_ranks=False, csv
             cap_embs[indexs] = caption_embeds.cpu().numpy()
             if return_ranks:
                 audio_names_[indexs] = np.array(audio_names)
+                caption_names[indexs] = np.array(captions)
 
         val_logger.info(f'Validation loss: {val_loss.avg :.3f}')
         # evaluate text to audio retrieval
         if return_ranks:
             r1, r5, r10, mAP10, medr, meanr, ranks, top5 = t2a(audio_embs, cap_embs, return_ranks=True)
-            make_csv(audio_names_, top5, csv_output_dir=csv_output_dir)
+            make_csv(caption_names, audio_names_, top5, csv_output_dir=csv_output_dir)
         else:
             r1, r5, r10, mAP10, medr, meanr = t2a(audio_embs, cap_embs)
 
