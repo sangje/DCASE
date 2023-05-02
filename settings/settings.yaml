@@ -26,7 +26,7 @@ data:
 training:
   margin: 0.2
   freeze: Yes
-  loss: infonce #ntxent  # 'triplet', 'weight', 'ntxent', 'bidirect'
+  loss: ntxent  # 'infonce' 'triplet', 'weight', 'ntxent', 'bidirect'
   spec_augmentation: Yes
   epochs: 50
   lr: !!float 1e-4
