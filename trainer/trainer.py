@@ -61,7 +61,7 @@ class Task(pl.LightningModule):
         else: 
             device, device_name = ('cpu', platform.processor())
 
-        self.main_logger.info(f'Process on {device}:{device_name}')
+        self.log(f'Process on {device}:{device_name}')
 
         # Set up Loss function
         if config.training.loss == 'triplet':
