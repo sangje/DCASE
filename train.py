@@ -84,5 +84,5 @@ if __name__ == '__main__':
     print(f'Size of training set: {len(train_loader.dataset)}, size of batches: {len(train_loader)}')
     print(f'Size of validation set: {len(val_loader.dataset)}, size of batches: {len(val_loader)}')
     print(f'Size of test set: {len(test_loader.dataset)}, size of batches: {len(test_loader)}')
-    trainer.fit(model=Task, train_dataloader=train_loader, val_dataloader=val_loader)
+    trainer.fit(model=Task, train_dataloaders=train_loader, val_dataloaders=val_loader)
     trainer.test(model=Task, dataloaders=test_loader)
