@@ -125,15 +125,15 @@ class Task(pl.LightningModule):
         
     def validation_step(self, batch, batch_idx):
         audios, captions, audio_ids, indexs, audio_names = batch
-        # data_size = self.config.val_datasets_size
+        data_size = self.config.data.val_datasets_size
         audio_embeds, caption_embeds = self.model(audios, captions)
 
         if self.audio_embs is None:
-            self.audio_embs = np.zeros((self.config.val_datasets_size, audio_embeds.shape[1]))
-            self.cap_embs = np.zeros((self.config.val_datasets_size, caption_embeds.shape[1]))
+            self.audio_embs = np.zeros((data_size, audio_embeds.shape[1]))
+            self.cap_embs = np.zeros((data_size, caption_embeds.shape[1]))
             if self.return_ranks:
-                audio_names_ = np.array(['                                                               ' for i in range(self.config.val_datasets_size)])
-                caption_names = np.array(['                                                                                                        ' for i in range(self.config.val_datasets_size)])
+                audio_names_ = np.array(['                                                               ' for i in range(data_size)])
+                caption_names = np.array(['                                                                                                        ' for i in range(data_size)])
         
         loss = self.criterion(audio_embeds, caption_embeds, audio_ids)
         self.log('validation_loss :', loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
@@ -160,15 +160,15 @@ class Task(pl.LightningModule):
     
     def test_step(self, batch, batch_idx):
         audios, captions, audio_ids, indexs, audio_names = batch
-        # data_size = self.config.val_datasets_size
+        data_size = self.config.data.test_datasets_size
         audio_embeds, caption_embeds = self.model(audios, captions)
 
         if self.audio_embs is None:
-            self.audio_embs = np.zeros((self.config.test_datasets_size, audio_embeds.shape[1]))
-            self.cap_embs = np.zeros((self.config.test_datasets_size, caption_embeds.shape[1]))
+            self.audio_embs = np.zeros((data_size, audio_embeds.shape[1]))
+            self.cap_embs = np.zeros((data_size, caption_embeds.shape[1]))
             if self.return_ranks:
-                audio_names_ = np.array(['                                                               ' for i in range(self.config.test_datasets_size)])
-                caption_names = np.array(['                                                                                                        ' for i in range(self.config.test_datasets_size)])
+                audio_names_ = np.array(['                                                               ' for i in range(data_size)])
+                caption_names = np.array(['                                                                                                        ' for i in range(data_size)])
         
         loss = self.criterion(audio_embeds, caption_embeds, audio_ids)
         self.log('test_loss :', loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)

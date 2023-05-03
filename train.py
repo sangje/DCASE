@@ -13,6 +13,7 @@ import warnings
 
 if __name__ == '__main__':
     warnings.filterwarnings("ignore")
+    os.environ['TF_ENABLE_ONEDNN_OPTS']=0
 
     parser = argparse.ArgumentParser(description='Settings.')
     parser.add_argument('-n', '--exp_name', default='exp_name', type=str,
@@ -58,7 +59,18 @@ if __name__ == '__main__':
     config.model_output_dir = Path('outputs', folder_name, 'models')
     config.log_output_dir = Path('outputs', folder_name, 'logging')
     config.folder_name = folder_name
+
+    # set up data loaders
+    train_loader = get_dataloader('train', config)
+    val_loader = get_dataloader('val', config)
+    test_loader = get_dataloader('test', config)
+    config.data.val_datasets_size = len(val_loader.dataset)
+    config.data.test_datasets_size = len(test_loader.dataset)
+    print(f'Size of training set: {len(train_loader.dataset)}, size of batches: {len(train_loader)}')
+    print(f'Size of validation set: {len(val_loader.dataset)}, size of batches: {len(val_loader)}')
+    print(f'Size of test set: {len(test_loader.dataset)}, size of batches: {len(test_loader)}')
     
+    # Model Defined
     Task=Task(config)
 
     # Checkpoint and LR Monitoring
@@ -78,13 +90,6 @@ if __name__ == '__main__':
         log_every_n_steps=25,
         )
     
-    # set up data loaders
-    train_loader = get_dataloader('train', config)
-    val_loader = get_dataloader('val', config)
-    test_loader = get_dataloader('test', config)
 
-    print(f'Size of training set: {len(train_loader.dataset)}, size of batches: {len(train_loader)}')
-    print(f'Size of validation set: {len(val_loader.dataset)}, size of batches: {len(val_loader)}')
-    print(f'Size of test set: {len(test_loader.dataset)}, size of batches: {len(test_loader)}')
     trainer.fit(model=Task, train_dataloaders=train_loader, val_dataloaders=val_loader)
     trainer.test(model=Task, dataloaders=test_loader)
