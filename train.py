@@ -9,8 +9,10 @@ from data_handling.DataLoader import get_dataloader
 from lightning.pytorch import LightningModule, Trainer, seed_everything
 from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint
 
+import warnings
 
 if __name__ == '__main__':
+    warnings.filterwarnings("ignore")
 
     parser = argparse.ArgumentParser(description='Settings.')
     parser.add_argument('-n', '--exp_name', default='exp_name', type=str,
