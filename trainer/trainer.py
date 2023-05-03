@@ -1,4 +1,3 @@
-import platform
 import sys
 import time
 import numpy as np
@@ -59,7 +58,7 @@ class Task(pl.LightningModule):
         if torch.cuda.is_available():
             device, device_name = ('cuda',torch.cuda.get_device_name(torch.cuda.current_device()))
         else: 
-            device, device_name = ('cpu', platform.processor())
+            device, device_name = ('cpu', None)
 
         print(f'Process on {device}:{device_name}')
 
@@ -126,15 +125,15 @@ class Task(pl.LightningModule):
         
     def validation_step(self, batch, batch_idx):
         audios, captions, audio_ids, indexs, audio_names = batch
-        batch_size = audios.shape[0]
+        data_size = self.config.val_datasets_size
         audio_embeds, caption_embeds = self.model(audios, captions)
 
         if self.audio_embs is None:
-            self.audio_embs = np.zeros((batch_size, audio_embeds.shape[1]))
-            self.cap_embs = np.zeros((batch_size, caption_embeds.shape[1]))
+            self.audio_embs = np.zeros((data_size, audio_embeds.shape[1]))
+            self.cap_embs = np.zeros((data_size, caption_embeds.shape[1]))
             if self.return_ranks:
-                audio_names_ = np.array(['                                                               ' for i in range(batch_size)])
-                caption_names = np.array(['                                                                                                        ' for i in range(batch_size)])
+                audio_names_ = np.array(['                                                               ' for i in range(data_size)])
+                caption_names = np.array(['                                                                                                        ' for i in range(data_size)])
         
         loss = self.criterion(audio_embeds, caption_embeds, audio_ids)
         self.log('validation_loss :', loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
@@ -160,7 +159,27 @@ class Task(pl.LightningModule):
         self.on_validation_epoch_start()
     
     def test_step(self, batch, batch_idx):
-        return self.validation_step(batch, batch_idx)
+        audios, captions, audio_ids, indexs, audio_names = batch
+        data_size = self.config.test_datasets_size
+        audio_embeds, caption_embeds = self.model(audios, captions)
+
+        if self.audio_embs is None:
+            self.audio_embs = np.zeros((data_size, audio_embeds.shape[1]))
+            self.cap_embs = np.zeros((data_size, caption_embeds.shape[1]))
+            if self.return_ranks:
+                audio_names_ = np.array(['                                                               ' for i in range(data_size)])
+                caption_names = np.array(['                                                                                                        ' for i in range(data_size)])
+        
+        loss = self.criterion(audio_embeds, caption_embeds, audio_ids)
+        self.log('test_loss :', loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
+
+        self.audio_embs[indexs] = audio_embeds.cpu().numpy()
+        self.cap_embs[indexs] = caption_embeds.cpu().numpy()
+
+        if self.return_ranks:
+            audio_names_[indexs] = np.array(audio_names)
+            caption_names[indexs] = np.array(captions)
+        return loss
 
     def on_test_end(self):
         if self.return_ranks:
