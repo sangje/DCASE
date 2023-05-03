@@ -125,7 +125,7 @@ class Task(pl.LightningModule):
         
     def validation_step(self, batch, batch_idx):
         audios, captions, audio_ids, indexs, audio_names = batch
-        data_size = self.config['val_datasets_size']
+        data_size = self.config.val_datasets_size
         audio_embeds, caption_embeds = self.model(audios, captions)
 
         if self.audio_embs is None:
@@ -160,7 +160,7 @@ class Task(pl.LightningModule):
     
     def test_step(self, batch, batch_idx):
         audios, captions, audio_ids, indexs, audio_names = batch
-        data_size = self.config['test_datasets_size']
+        data_size = self.config.test_datasets_size
         audio_embeds, caption_embeds = self.model(audios, captions)
 
         if self.audio_embs is None:
