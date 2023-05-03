@@ -109,7 +109,10 @@ class Task(pl.LightningModule):
         optimizer = torch.optim.Adam(params=self.model.parameters(), lr=self.config.training.lr)
         # set up scheduler
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer,'min',factor=0.5,patience=5,threshold=0.005,threshold_mode='abs',min_lr=0.000001,verbose=True)        return [optimizer], [scheduler]
-        return [optimizer], [scheduler]
+        return {"optimizer":optimizer, 
+                "lr_scheduler":{"scheduler":scheduler,
+                                "monitor": loss,
+                                "frequency": 5}}
 
     def on_validation_start(self):
         self.audio_embs, self.cap_embs , self.audio_names_, self.caption_names= None, None, None, None
