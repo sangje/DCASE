@@ -60,8 +60,8 @@ if __name__ == '__main__':
     Task=Task(config)
 
     # Checkpoint and LR Monitoring
-    checkpoint_callback = ModelCheckpoint(monitor='loss',
-        filename="{epoch}_{cosine_eer:.2f}", dirpath=config.model_output_dir)
+    checkpoint_callback = ModelCheckpoint(monitor='val_loss',
+        filename="{epoch}", dirpath=config.model_output_dir)
     lr_monitor = LearningRateMonitor(logging_interval='step')
 
     trainer = Trainer(
