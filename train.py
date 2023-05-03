@@ -1,16 +1,17 @@
 import os
 import argparse
 import torch
-from trainer.trainer import train
+from trainer.trainer import Task
 from tools.config_loader import get_config
+from pathlib import Path
+from data_handling.DataLoader import get_dataloader
+
+from pytorch_lightning import LightningModule, Trainer, seed_everything
+from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
+from pytorch_lightning.plugins import DDPPlugin
 
 
 if __name__ == '__main__':
-
-    os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
-    os.environ['TOKENIZERS_PARALLELISM'] = 'false'
-
-    torch.backends.cudnn.enabled = False
 
     parser = argparse.ArgumentParser(description='Settings.')
     parser.add_argument('-n', '--exp_name', default='exp_name', type=str,
@@ -47,5 +48,43 @@ if __name__ == '__main__':
     config.training.margin = args.margin
     config.training.seed = args.seed
     config.training.epochs = args.epochs
+
+    # Set up Path Names
+    folder_name = '{}_freeze_{}_lr_{}_' \
+                    'seed_{}'.format(config.exp_name, str(config.training.freeze),
+                                                config.training.lr,
+                                                config.training.seed)
+    config.model_output_dir = Path('outputs', folder_name, 'models')
+    config.log_output_dir = Path('outputs', folder_name, 'logging')
     
-    train(config)
+    Task=Task(config)
+
+    # Checkpoint and LR Monitoring
+    checkpoint_callback = ModelCheckpoint(monitor='loss',
+        filename="{epoch}_{cosine_eer:.2f}", dirpath=config.model_output_dir)
+    lr_monitor = LearningRateMonitor(logging_interval='step')
+
+    trainer = Trainer(
+        max_epochs=config.epochs,
+        plugins=DDPPlugin(find_unused_parameters=False),
+        num_sanity_val_steps=-1,
+        sync_batchnorm=True,
+        callbacks=[checkpoint_callback, lr_monitor],
+        default_root_dir=config.log_output_dir,
+        reload_dataloaders_every_n_epochs=1,
+        accumulate_grad_batches=1,
+        log_every_n_steps=25,
+        )
+    
+    # set up data loaders
+    train_loader = get_dataloader('train', config)
+    val_loader = get_dataloader('val', config)
+    test_loader = get_dataloader('test', config)
+
+    print(f'Size of training set: {len(train_loader.dataset)}, size of batches: {len(train_loader)}')
+    print(f'Size of validation set: {len(val_loader.dataset)}, size of batches: {len(val_loader)}')
+    print(f'Size of test set: {len(test_loader.dataset)}, size of batches: {len(test_loader)}')
+    print(f'Total parameters: {sum([i.numel() for i in self.model.parameters()])}')
+    trainer.train(model=Task, dataloaders=train_loader)
+    trainer.validate(model=Task, dataloaders=val_loader)
+    trainer.test(model=Task, dataloaders=test_loader)

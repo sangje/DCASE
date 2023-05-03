@@ -15,8 +15,10 @@ from models.TextEncoder import BertEncoder #, W2VEncoder
 from models.SBertEncoder import SenBERTEncoder
 from models.BERT_Config import MODELS
 
+import pytorch_lightning as pl
 
-class AudioEnc(nn.Module):
+
+class AudioEnc(pl.LightningModule):
 
     def __init__(self, config):
         super(AudioEnc, self).__init__()
@@ -69,7 +71,7 @@ class AudioEnc(nn.Module):
         return audio_encoded
 
 
-class ASE(nn.Module):
+class ASE(pl.LightningModule):
 
     def __init__(self, config):
         super(ASE, self).__init__()

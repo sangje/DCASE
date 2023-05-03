@@ -9,6 +9,7 @@ import torch.nn.functional as F
 from torchlibrosa.stft import Spectrogram, LogmelFilterBank
 from torchlibrosa.augmentation import SpecAugmentation
 
+import pytorch_lightning as pl
 
 #Cnn10, Cnn14, ResNet38, Wavegram_Logmel_Cnn14
 
@@ -28,7 +29,7 @@ def init_bn(bn):
     bn.weight.data.fill_(1.)
 
 
-class ConvBlock(nn.Module):
+class ConvBlock(pl.LightningModule):
     def __init__(self, in_channels, out_channels):
 
         super(ConvBlock, self).__init__()
@@ -73,7 +74,7 @@ class ConvBlock(nn.Module):
         return x
 
 
-class Cnn10(nn.Module):
+class Cnn10(pl.LightningModule):
     def __init__(self, config):
 
         super(Cnn10, self).__init__()
@@ -153,7 +154,7 @@ class Cnn10(nn.Module):
         return x
 
 
-class Cnn14(nn.Module):
+class Cnn14(pl.LightningModule):
 
     def __init__(self, config):
 
@@ -253,7 +254,7 @@ def _resnet_conv1x1(in_planes, out_planes):
     return nn.Conv2d(in_planes, out_planes, kernel_size=1, stride=1, bias=False)
 
 
-class _ResnetBasicBlock(nn.Module):
+class _ResnetBasicBlock(pl.LightningModule):
     expansion = 1
 
     def __init__(self, inplanes, planes, stride=1, downsample=None, groups=1,
@@ -311,7 +312,7 @@ class _ResnetBasicBlock(nn.Module):
         return out
 
 
-class _ResNet(nn.Module):
+class _ResNet(pl.LightningModule):
     def __init__(self, block, layers, zero_init_residual=False,
                  groups=1, width_per_group=64, replace_stride_with_dilation=None,
                  norm_layer=None):
@@ -385,7 +386,7 @@ class _ResNet(nn.Module):
         return x
 
 
-class ResNet38(nn.Module):
+class ResNet38(pl.LightningModule):
     def __init__(self, config):
 
         super(ResNet38, self).__init__()
@@ -468,7 +469,7 @@ class ResNet38(nn.Module):
 
 
 
-class ConvPreWavBlock(nn.Module):
+class ConvPreWavBlock(pl.LightningModule):
     def __init__(self, in_channels, out_channels):
         
         super(ConvPreWavBlock, self).__init__()
@@ -506,7 +507,7 @@ class ConvPreWavBlock(nn.Module):
 
 
 
-class Wavegram_Logmel_Cnn14(nn.Module):
+class Wavegram_Logmel_Cnn14(pl.LightningModule):
     def __init__(self, config):
         
         super(Wavegram_Logmel_Cnn14, self).__init__()

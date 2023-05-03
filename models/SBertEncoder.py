@@ -4,6 +4,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
 
+import pytorch_lightning as pl
 
 from transformers import AutoTokenizer, AutoModel
 from transformers import BertModel, BertTokenizer, GPT2Model, GPT2Tokenizer,\
@@ -16,7 +17,7 @@ from models.BERT_Config import MODELS
 
 
 
-class SenBERTEncoder(nn.Module):
+class SenBERTEncoder(pl.LightningModule):
     def __init__(self, config):
         super(SenBERTEncoder, self).__init__()
         
