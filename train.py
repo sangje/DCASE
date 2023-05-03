@@ -55,6 +55,7 @@ if __name__ == '__main__':
                                                 config.training.seed)
     config.model_output_dir = Path('outputs', folder_name, 'models')
     config.log_output_dir = Path('outputs', folder_name, 'logging')
+    config.folder_name = folder_name
     
     Task=Task(config)
 
