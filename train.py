@@ -6,9 +6,9 @@ from tools.config_loader import get_config
 from pathlib import Path
 from data_handling.DataLoader import get_dataloader
 
-from pytorch_lightning import LightningModule, Trainer, seed_everything
-from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
-from pytorch_lightning.plugins import DDPPlugin
+from lightning.pytorch import LightningModule, Trainer, seed_everything
+from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint
+from lightning.pytorch.plugins import DDPPlugin
 
 
 if __name__ == '__main__':
