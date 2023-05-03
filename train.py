@@ -8,7 +8,6 @@ from data_handling.DataLoader import get_dataloader
 
 from lightning.pytorch import LightningModule, Trainer, seed_everything
 from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint
-from lightning.pytorch.plugins import DDPPlugin
 
 
 if __name__ == '__main__':
@@ -66,7 +65,7 @@ if __name__ == '__main__':
 
     trainer = Trainer(
         max_epochs=config.epochs,
-        plugins=DDPPlugin(find_unused_parameters=False),
+        strategy="ddp_spawn",
         num_sanity_val_steps=-1,
         sync_batchnorm=True,
         callbacks=[checkpoint_callback, lr_monitor],
