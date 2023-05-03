@@ -35,21 +35,25 @@ class Task(pl.LightningModule):
         if config.training.csv:
             config.csv_output_dir = Path('outputs', config.folder_name, 'csv')
             config.csv_output_dir.mkdir(parents=True, exist_ok=True)
-    
+        '''
+        This is for logger
+
         logger.add(sys.stdout, format='{time: YYYY-MM-DD at HH:mm:ss} | {message}', level='INFO',
                 filter=lambda record: record['extra']['indent'] == 1)
-        logger.add(self.log_output_dir.joinpath('output.txt'), format='{time: YYYY-MM-DD at HH:mm:ss} | {message}', level='INFO',
+        logger.add(config.log_output_dir.joinpath('output.txt'), format='{time: YYYY-MM-DD at HH:mm:ss} | {message}', level='INFO',
                 filter=lambda record: record['extra']['indent'] == 1)
 
         self.main_logger = logger.bind(indent=1)
 
         # setup TensorBoard
         writer = SummaryWriter(log_dir=str(self.log_output_dir) + '/tensorboard')
+    
 
         # print training settings
         printer = PrettyPrinter()
         self.main_logger.info('Training setting:\n'
                         f'{printer.pformat(config)}')
+        '''
 
         # set up model
         if torch.cuda.is_available():
@@ -162,6 +166,6 @@ class Task(pl.LightningModule):
         if self.return_ranks:
             r1, r5, r10, mAP10, medr, meanr, ranks, top10 = t2a(self.audio_embs, self.cap_embs, return_ranks=True)
             make_csv(self.caption_names, self.audio_names_, top10, csv_output_dir=self.csv_output_dir)
-            self.main_loggerr.info('CSV File was completly made at {}!'.format(self.csv_output_dir))
+            self.log('CSV File was completly made at {}!'.format(self.csv_output_dir))
         else:
             r1, r5, r10, mAP10, medr, meanr = t2a(self.audio_embs, self.cap_embs)

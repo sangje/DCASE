@@ -5,7 +5,7 @@
 
 
 import yaml
-#from dotmap import DotMap
+from dotmap import DotMap
 
 
 def get_config(config_name='settings'):
