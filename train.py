@@ -84,7 +84,6 @@ if __name__ == '__main__':
     print(f'Size of training set: {len(train_loader.dataset)}, size of batches: {len(train_loader)}')
     print(f'Size of validation set: {len(val_loader.dataset)}, size of batches: {len(val_loader)}')
     print(f'Size of test set: {len(test_loader.dataset)}, size of batches: {len(test_loader)}')
-    print(f'Total parameters: {sum([i.numel() for i in self.model.parameters()])}')
     trainer.train(model=Task, dataloaders=train_loader)
     trainer.validate(model=Task, dataloaders=val_loader)
     trainer.test(model=Task, dataloaders=test_loader)
