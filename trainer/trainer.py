@@ -130,7 +130,7 @@ class Task(pl.LightningModule):
         audio_embeds, caption_embeds = self.model(audios, captions)
 
         if self.audio_embs is None:
-            self.audio_embs = np.zeros((batch_size, audio_embeds.size(1)))
+            self.audio_embs = np.zeros((batch_size, audio_embeds.shape(1)))
             self.cap_embs = np.zeros((batch_size, caption_embeds.shape(1)))
             if self.return_ranks:
                 audio_names_ = np.array(['                                                               ' for i in range(batch_size)])
