@@ -129,9 +129,9 @@ class Task(pl.LightningModule):
         
         audio_embeds, caption_embeds = self.model(audios, captions)
 
-        if audio_embs is None:
-            audio_embs = np.zeros((batch.shape[0], audio_embeds.size(1)))
-            cap_embs = np.zeros((len(batch.shape[0].dataset), caption_embeds.size(1)))
+        if self.audio_embs is None:
+            self.audio_embs = np.zeros((batch.shape[0], audio_embeds.size(1)))
+            self.cap_embs = np.zeros((len(batch.shape[0].dataset), caption_embeds.size(1)))
             if self.return_ranks:
                 audio_names_ = np.array(['                                                               ' for i in range(len(batch.shape[0].dataset))])
                 caption_names = np.array(['                                                                                                        ' for i in range(len(batch.shape[0].dataset))])
@@ -139,12 +139,12 @@ class Task(pl.LightningModule):
         loss = self.criterion(audio_embeds, caption_embeds, audio_ids)
         self.log('validation_loss :', loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
 
-        audio_embs[indexs] = audio_embeds.cpu().numpy()
-        cap_embs[indexs] = caption_embeds.cpu().numpy()
+        self.audio_embs[indexs] = audio_embeds.cpu().numpy()
+        self.cap_embs[indexs] = caption_embeds.cpu().numpy()
 
         if self.return_ranks:
-            audio_names_[indexs] = np.array(audio_names)
-            caption_names[indexs] = np.array(captions)
+            self.audio_names_[indexs] = np.array(audio_names)
+            self.caption_names[indexs] = np.array(captions)
         return loss
     
     def on_validation_end(self):
