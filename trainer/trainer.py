@@ -61,7 +61,7 @@ class Task(pl.LightningModule):
         else: 
             device, device_name = ('cpu', platform.processor())
 
-        self.log(f'Process on {device}:{device_name}')
+        print(f'Process on {device}:{device_name}')
 
         # Set up Loss function
         if config.training.loss == 'triplet':
@@ -105,7 +105,7 @@ class Task(pl.LightningModule):
         audio_embeds, caption_embeds = self.model(audios, captions)
 
         loss = self.criterion(audio_embeds, caption_embeds, audio_ids)
-        self.log('train_loss :',loss,prog_bar=True)
+        self.log('train_loss :',loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
         return loss
 
     def configure_optimizers(self):
@@ -137,7 +137,7 @@ class Task(pl.LightningModule):
                 caption_names = np.array(['                                                                                                        ' for i in range(len(batch.shape[0].dataset))])
         
         loss = self.criterion(audio_embeds, caption_embeds, audio_ids)
-        self.log('validation_loss :', loss, prog_bar=True)
+        self.log('validation_loss :', loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
 
         audio_embs[indexs] = audio_embeds.cpu().numpy()
         cap_embs[indexs] = caption_embeds.cpu().numpy()
@@ -166,6 +166,6 @@ class Task(pl.LightningModule):
         if self.return_ranks:
             r1, r5, r10, mAP10, medr, meanr, ranks, top10 = t2a(self.audio_embs, self.cap_embs, return_ranks=True)
             make_csv(self.caption_names, self.audio_names_, top10, csv_output_dir=self.csv_output_dir)
-            self.log('CSV File was completly made at {}!'.format(self.csv_output_dir))
+            print('CSV File was completly made at {}!'.format(self.csv_output_dir))
         else:
             r1, r5, r10, mAP10, medr, meanr = t2a(self.audio_embs, self.cap_embs)
