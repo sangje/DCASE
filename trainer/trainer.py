@@ -104,7 +104,7 @@ class Task(pl.LightningModule):
         audio_embeds, caption_embeds = self.model(audios, captions)
 
         loss = self.criterion(audio_embeds, caption_embeds, audio_ids)
-        self.log('train_loss :',loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        self.log('train_loss',loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
         return loss
 
     def configure_optimizers(self):
@@ -136,7 +136,7 @@ class Task(pl.LightningModule):
                 self.caption_names = np.array(['                                                                                                        ' for i in range(data_size)])
         
         loss = self.criterion(audio_embeds, caption_embeds, audio_ids)
-        self.log('validation_loss :', loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        self.log('validation_loss', loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
 
         self.audio_embs[indexs] = audio_embeds.cpu().numpy()
         self.cap_embs[indexs] = caption_embeds.cpu().numpy()
@@ -171,7 +171,7 @@ class Task(pl.LightningModule):
                 self.caption_names = np.array(['                                                                                                        ' for i in range(data_size)])
         
         loss = self.criterion(audio_embeds, caption_embeds, audio_ids)
-        self.log('test_loss :', loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        self.log('test_loss', loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
 
         self.audio_embs[indexs] = audio_embeds.cpu().numpy()
         self.cap_embs[indexs] = caption_embeds.cpu().numpy()
