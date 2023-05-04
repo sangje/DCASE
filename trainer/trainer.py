@@ -151,7 +151,7 @@ class Task(pl.LightningModule):
             r1, r5, r10, mAP10, medr, meanr, ranks, top10 = t2a(self.audio_embs, self.cap_embs, return_ranks=True)
         else:
             r1, r5, r10, mAP10, medr, meanr = t2a(self.audio_embs, self.cap_embs)
-        self.logger.experiment({'r1':r1, 'r5':r5, 'r10':r10, 'mAP10':mAP10, 'medr':medr, 'meanr':meanr})
+        self.logger.experiment.add_scalars({'r1':r1, 'r5':r5, 'r10':r10, 'mAP10':mAP10, 'medr':medr, 'meanr':meanr})
 
     def on_test_start(self):
         self.on_validation_start()
@@ -189,4 +189,4 @@ class Task(pl.LightningModule):
             print('CSV File was completly made at {}!'.format(self.csv_output_dir))
         else:
             r1, r5, r10, mAP10, medr, meanr = t2a(self.audio_embs, self.cap_embs)
-        self.logger.experiment({'r1':r1, 'r5':r5, 'r10':r10, 'mAP10':mAP10, 'medr':medr, 'meanr':meanr})
+        self.logger.experiment.add_scalars({'r1':r1, 'r5':r5, 'r10':r10, 'mAP10':mAP10, 'medr':medr, 'meanr':meanr})
