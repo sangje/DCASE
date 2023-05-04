@@ -21,7 +21,7 @@ cnn_encoder:
 
 data:
   batch_size: 24 #64
-  num_workers: 8
+  num_workers: 12
   val_datasets_size: 0 # Do not modify
   test_datasets_size: 0
 

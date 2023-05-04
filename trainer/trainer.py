@@ -4,9 +4,9 @@ import numpy as np
 import torch
 from tqdm import tqdm
 from pathlib import Path
-from loguru import logger
-from pprint import PrettyPrinter
-from torch.utils.tensorboard import SummaryWriter
+#from loguru import logger
+#from pprint import PrettyPrinter
+#from torch.utils.tensorboard import SummaryWriter
 from tools.utils import setup_seed, AverageMeter, a2t, t2a
 from tools.loss import BiDirectionalRankingLoss, TripletLoss, NTXent
 from tools.info_loss import InFoNCELoss

@@ -15,7 +15,7 @@ from models.TextEncoder import BertEncoder #, W2VEncoder
 from models.SBertEncoder import SenBERTEncoder
 from models.BERT_Config import MODELS
 
-import pytorch_lightning as pl
+import lightning.pytorch as pl
 
 
 class AudioEnc(pl.LightningModule):

@@ -11,7 +11,6 @@ import numpy as np
 import torch
 import random
 from sentence_transformers import util
-from loguru import logger
 from tools.file_io import load_pickle_file
 from gensim.models.word2vec import Word2Vec
 
