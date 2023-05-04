@@ -140,7 +140,7 @@ def t2a(audio_embs, cap_embs, return_ranks=False):
     audios = np.array([audio_embs[i]for i in range(0, audio_embs.shape[0], 5)])
 
     ranks = np.zeros(5 * num_audios)
-    top10 = np.zeros([5 * num_audios,5])
+    top10 = np.zeros([5 * num_audios,10])
 
     for index in range(num_audios):
 
