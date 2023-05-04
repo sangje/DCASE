@@ -81,7 +81,7 @@ if __name__ == '__main__':
     lr_monitor = LearningRateMonitor(logging_interval='step')
 
     trainer = Trainer(
-        logger=TensorBoardLogger(),
+        logger=TensorBoardLogger(save_dir=config.log_output_dir),
         max_epochs=config.training.epochs,
         strategy=DDPStrategy(find_unused_parameters=True),
         num_sanity_val_steps=-1,
