@@ -13,7 +13,6 @@ from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint
 
 
 if __name__ == '__main__':
-    os.environ['TF_ENABLE_ONEDNN_OPTS']='0'
     os.environ['TOKENIZERS_PARALLELISM'] = 'false'
 
     parser = argparse.ArgumentParser(description='Settings.')
