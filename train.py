@@ -1,3 +1,5 @@
+import warnings
+warnings.filterwarnings("ignore")
 import os
 import argparse
 import torch
@@ -9,10 +11,8 @@ from data_handling.DataLoader import get_dataloader
 from lightning.pytorch import LightningModule, Trainer, seed_everything
 from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint
 
-import warnings
 
 if __name__ == '__main__':
-    warnings.filterwarnings("ignore")
     os.environ['TF_ENABLE_ONEDNN_OPTS']='0'
     os.environ['TOKENIZERS_PARALLELISM'] = 'false'
 
