@@ -80,7 +80,7 @@ if __name__ == '__main__':
 
     trainer = Trainer(
         max_epochs=config.training.epochs,
-        strategy="ddp_spawn",
+        strategy="ddp_find_unused_parameters_truen",
         num_sanity_val_steps=-1,
         sync_batchnorm=True,
         callbacks=[checkpoint_callback, lr_monitor],
