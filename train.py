@@ -10,7 +10,7 @@ from data_handling.DataLoader import get_dataloader
 
 from lightning.pytorch import LightningModule, Trainer, seed_everything
 from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint
-
+from lightning.pytorch.strategies import DDPStrategy
 
 if __name__ == '__main__':
     os.environ['TOKENIZERS_PARALLELISM'] = 'false'
@@ -80,7 +80,7 @@ if __name__ == '__main__':
 
     trainer = Trainer(
         max_epochs=config.training.epochs,
-        strategy="ddp_find_unused_parameters_truen",
+        strategy=DDPStrategy(find_unused_parameters=True),
         num_sanity_val_steps=-1,
         sync_batchnorm=True,
         callbacks=[checkpoint_callback, lr_monitor],
