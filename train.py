@@ -11,6 +11,8 @@ from data_handling.DataLoader import get_dataloader
 from lightning.pytorch import LightningModule, Trainer, seed_everything
 from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint
 from lightning.pytorch.strategies import DDPStrategy
+from lightning.pytorch.loggers import TensorBoardLogger
+
 
 if __name__ == '__main__':
     os.environ['TOKENIZERS_PARALLELISM'] = 'false'
@@ -79,6 +81,7 @@ if __name__ == '__main__':
     lr_monitor = LearningRateMonitor(logging_interval='step')
 
     trainer = Trainer(
+        logger=TensorBoardLogger(),
         max_epochs=config.training.epochs,
         strategy=DDPStrategy(find_unused_parameters=True),
         num_sanity_val_steps=-1,
