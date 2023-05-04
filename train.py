@@ -80,7 +80,7 @@ if __name__ == '__main__':
     lr_monitor = LearningRateMonitor(logging_interval='step')
 
     trainer = Trainer(
-        max_epochs=config.epochs,
+        max_epochs=config.training.epochs,
         strategy="ddp_spawn",
         num_sanity_val_steps=-1,
         sync_batchnorm=True,
