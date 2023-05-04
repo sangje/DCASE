@@ -14,6 +14,7 @@ import warnings
 if __name__ == '__main__':
     warnings.filterwarnings("ignore")
     os.environ['TF_ENABLE_ONEDNN_OPTS']='0'
+    os.environ['TOKENIZERS_PARALLELISM'] = 'false'
 
     parser = argparse.ArgumentParser(description='Settings.')
     parser.add_argument('-n', '--exp_name', default='exp_name', type=str,
