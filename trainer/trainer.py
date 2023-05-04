@@ -32,8 +32,8 @@ class Task(pl.LightningModule):
         config.log_output_dir.mkdir(parents=True, exist_ok=True)
         config.model_output_dir.mkdir(parents=True, exist_ok=True)
         if config.training.csv:
-            config.csv_output_dir = Path('outputs', config.folder_name, 'csv')
-            config.csv_output_dir.mkdir(parents=True, exist_ok=True)
+            self.csv_output_dir = Path('outputs', config.folder_name, 'csv')
+            self.csv_output_dir.mkdir(parents=True, exist_ok=True)
         '''
         This is for logger
 
