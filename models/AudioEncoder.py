@@ -9,7 +9,7 @@ import torch.nn.functional as F
 from torchlibrosa.stft import Spectrogram, LogmelFilterBank
 from torchlibrosa.augmentation import SpecAugmentation
 
-import pytorch_lightning as pl
+import lightning.pytorch as pl
 
 #Cnn10, Cnn14, ResNet38, Wavegram_Logmel_Cnn14
 

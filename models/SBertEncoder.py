@@ -4,7 +4,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
 
-import pytorch_lightning as pl
+import lightning.pytorch as pl
 
 from transformers import AutoTokenizer, AutoModel
 from transformers import BertModel, BertTokenizer, GPT2Model, GPT2Tokenizer,\

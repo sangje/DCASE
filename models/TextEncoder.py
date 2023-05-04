@@ -9,7 +9,7 @@ import torch.nn as nn
 import numpy as np
 from models.BERT_Config import MODELS
 
-import pytorch_lightning as pl
+import lightning.pytorch as pl
 
 
 class BertEncoder(pl.LightningModule):

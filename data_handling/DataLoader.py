@@ -11,7 +11,7 @@ import h5py
 from torch.utils.data import Dataset
 from torch.utils.data.dataloader import DataLoader
 
-import pytorch_lightning as pl
+import lightning.pytorch as pl
 
 
 class AudioCaptionDataset(Dataset):
