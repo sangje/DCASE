@@ -75,7 +75,7 @@ if __name__ == '__main__':
     Task=Task(config)
 
     # Checkpoint and LR Monitoring
-    checkpoint_callback = ModelCheckpoint(monitor='val_loss',
+    checkpoint_callback = ModelCheckpoint(monitor='validation_loss',
         filename="{epoch}", dirpath=config.model_output_dir)
     lr_monitor = LearningRateMonitor(logging_interval='step')
 
