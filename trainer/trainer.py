@@ -132,8 +132,8 @@ class Task(pl.LightningModule):
             self.audio_embs = np.zeros((data_size, audio_embeds.shape[1]))
             self.cap_embs = np.zeros((data_size, caption_embeds.shape[1]))
             if self.return_ranks:
-                self.audio_names_ = np.array(['                                                               ' for i in range(data_size)])
-                self.caption_names = np.array(['                                                                                                        ' for i in range(data_size)])
+                self.audio_names_ = np.array([None for i in range(data_size)], dtype=object)
+                self.caption_names = np.array([None for i in range(data_size)], dtype=object)
         
         loss = self.criterion(audio_embeds, caption_embeds, audio_ids)
         self.log('validation_loss', loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
@@ -151,6 +151,7 @@ class Task(pl.LightningModule):
             r1, r5, r10, mAP10, medr, meanr, ranks, top10 = t2a(self.audio_embs, self.cap_embs, return_ranks=True)
         else:
             r1, r5, r10, mAP10, medr, meanr = t2a(self.audio_embs, self.cap_embs)
+        self.log_dict({'r1':r1, 'r5':r5, 'r10':r10, 'mAP10':mAP10, 'medr':medr, 'meanr':meanr})
 
     def on_test_start(self):
         self.on_validation_start()
@@ -167,8 +168,8 @@ class Task(pl.LightningModule):
             self.audio_embs = np.zeros((data_size, audio_embeds.shape[1]))
             self.cap_embs = np.zeros((data_size, caption_embeds.shape[1]))
             if self.return_ranks:
-                self.audio_names_ = np.array(['                                                               ' for i in range(data_size)])
-                self.caption_names = np.array(['                                                                                                        ' for i in range(data_size)])
+                self.audio_names_ = np.array([None for i in range(data_size)],dtype=object)
+                self.caption_names = np.array([None for i in range(data_size)],dtype=object)
         
         loss = self.criterion(audio_embeds, caption_embeds, audio_ids)
         self.log('test_loss', loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
@@ -188,3 +189,4 @@ class Task(pl.LightningModule):
             print('CSV File was completly made at {}!'.format(self.csv_output_dir))
         else:
             r1, r5, r10, mAP10, medr, meanr = t2a(self.audio_embs, self.cap_embs)
+        self.log_dict({'r1':r1, 'r5':r5, 'r10':r10, 'mAP10':mAP10, 'medr':medr, 'meanr':meanr})
