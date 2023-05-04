@@ -10,7 +10,7 @@ from data_handling.DataLoader import get_dataloader
 
 from lightning.pytorch import LightningModule, Trainer, seed_everything
 from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint
-from lightning.pytorch.strategies import DDPStrategy
+from pytorch_lightning.plugins import DDPPlugin
 from lightning.pytorch.loggers import TensorBoardLogger
 
 
@@ -80,10 +80,13 @@ if __name__ == '__main__':
         filename="{epoch}", dirpath=config.model_output_dir)
     lr_monitor = LearningRateMonitor(logging_interval='step')
 
+    ddp_plugin = DDPPlugin(find_unused_parameters=True)
+
     trainer = Trainer(
         logger=TensorBoardLogger(save_dir=config.log_output_dir),
         max_epochs=config.training.epochs,
-        strategy=DDPStrategy(find_unused_parameters=True),
+        accelerator='ddp',
+        plugins=ddp_plugin,
         num_sanity_val_steps=-1,
         sync_batchnorm=True,
         callbacks=[checkpoint_callback, lr_monitor],
