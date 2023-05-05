@@ -26,7 +26,7 @@ class Task(pl.LightningModule):
         self.return_ranks = config.training.csv
         
         # setup seed for reproducibility
-        setup_seed(config.training.seed)
+        # setup_seed(config.training.seed)
 
         # set up logger
         config.log_output_dir.mkdir(parents=True, exist_ok=True)

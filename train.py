@@ -53,6 +53,9 @@ if __name__ == '__main__':
     config.training.seed = args.seed
     config.training.epochs = args.epochs
 
+    # Set Up Seed
+    seed_everything(config.training.seed, workers=True)
+    
     # Set up Path Names
     folder_name = '{}_freeze_{}_lr_{}_' \
                     'seed_{}'.format(config.exp_name, str(config.training.freeze),
@@ -92,7 +95,7 @@ if __name__ == '__main__':
         default_root_dir=config.log_output_dir,
         reload_dataloaders_every_n_epochs=1,
         accumulate_grad_batches=1,
-        log_every_n_steps=25,
+        log_every_n_steps=1,
         )
     
 
