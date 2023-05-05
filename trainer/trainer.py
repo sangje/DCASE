@@ -55,12 +55,11 @@ class Task(pl.LightningModule):
         '''
 
         # set up model
-        if torch.cuda.is_available():
-            device, device_name = ('cuda',torch.cuda.get_device_name(torch.cuda.current_device()))
-        else: 
-            device, device_name = ('cpu', None)
-
-        print(f'Process on {device}:{device_name}')
+        # if torch.cuda.is_available():
+        #     device, device_name = ('cuda',torch.cuda.get_device_name(torch.cuda.current_device()))
+        # else: 
+        #     device, device_name = ('cpu', None)
+        # print(f'Process on {device}:{device_name}')
 
         # Set up Loss function
         if config.training.loss == 'triplet':
@@ -87,15 +86,11 @@ class Task(pl.LightningModule):
             self.optimizer.load_state_dict(checkpoint['optimizer'])
             ep = checkpoint['epoch']
 
-    def forward(self, x):
-        return torch.relu(self.l1(x.view(x.size(0), -1)))
+    # def on_train_start(self):
+    #     self.recall_sum =[]
 
-    def on_train_start(self):
-        self.recall_sum =[]
-
-    def on_train_epoch_start(self):
-        self.epoch_loss = AverageMeter()
-
+    # def on_train_epoch_start(self):
+    #     self.epoch_loss = AverageMeter()
 
     def training_step(self, batch, batch_idx):
 
@@ -120,8 +115,8 @@ class Task(pl.LightningModule):
     def on_validation_start(self):
         self.audio_embs, self.cap_embs , self.audio_names_, self.caption_names= None, None, None, None
 
-    def on_validation_epoch_start(self):
-        self.epoch_loss = AverageMeter()
+    # def on_validation_epoch_start(self):
+    #     self.epoch_loss = AverageMeter()
         
     def validation_step(self, batch, batch_idx):
         audios, captions, audio_ids, indexs, audio_names = batch
@@ -151,13 +146,13 @@ class Task(pl.LightningModule):
             r1, r5, r10, mAP10, medr, meanr, ranks, top10 = t2a(self.audio_embs, self.cap_embs, return_ranks=True)
         else:
             r1, r5, r10, mAP10, medr, meanr = t2a(self.audio_embs, self.cap_embs)
-        self.logger.experiment.add_scalars('metric',{'r1':r1, 'r5':r5, 'r10':r10, 'mAP10':mAP10, 'medr':medr, 'meanr':meanr})
+        self.logger.experiment.add_scalars('val_metric',{'r1':r1, 'r5':r5, 'r10':r10, 'mAP10':mAP10, 'medr':medr, 'meanr':meanr})
 
     def on_test_start(self):
         self.on_validation_start()
     
-    def on_test_epoch_start(self):
-        self.on_validation_epoch_start()
+    # def on_test_epoch_start(self):
+    #     self.on_validation_epoch_start()
     
     def test_step(self, batch, batch_idx):
         audios, captions, audio_ids, indexs, audio_names = batch
@@ -189,4 +184,4 @@ class Task(pl.LightningModule):
             print('CSV File was completly made at {}!'.format(self.csv_output_dir))
         else:
             r1, r5, r10, mAP10, medr, meanr = t2a(self.audio_embs, self.cap_embs)
-        self.logger.experiment.add_scalars('metric',{'r1':r1, 'r5':r5, 'r10':r10, 'mAP10':mAP10, 'medr':medr, 'meanr':meanr})
+        self.logger.experiment.add_scalars('test_metric',{'r1':r1, 'r5':r5, 'r10':r10, 'mAP10':mAP10, 'medr':medr, 'meanr':meanr})
