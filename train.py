@@ -88,7 +88,7 @@ if __name__ == '__main__':
     trainer = Trainer(
         logger=TensorBoardLogger(save_dir=config.log_output_dir),
         max_epochs=config.training.epochs,
-        strategy=ddp_strategy,
+        strategy='ddp_spawn',
         num_sanity_val_steps=-1,
         sync_batchnorm=True,
         callbacks=[checkpoint_callback, lr_monitor],
