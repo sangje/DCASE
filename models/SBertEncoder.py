@@ -25,6 +25,6 @@ class SenBERTEncoder(pl.LightningModule):
         
     def forward(self, captions):        
         
-        text_output = self.bert_encoder(captions)
+        text_output = self.bert_encoder.encode(captions)
         
         return text_output
