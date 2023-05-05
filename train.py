@@ -10,7 +10,7 @@ from data_handling.DataLoader import get_dataloader
 
 from lightning.pytorch import LightningModule, Trainer, seed_everything
 from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint
-from pytorch_lightning.strategies import DDPStrategy
+from lightning.pytorch.strategies import DDPStrategy
 from lightning.pytorch.loggers import TensorBoardLogger
 
 
