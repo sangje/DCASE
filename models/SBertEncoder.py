@@ -15,13 +15,9 @@ class SenBERTEncoder(pl.LightningModule):
         
         self.bert_encoder = SentenceTransformer('sentence-transformers/all-mpnet-base-v2') # Input:Text Output:Embeddings(768-dimensions)
         
-        if config.training.freeze:
-            for name, param in self.bert_encoder.named_parameters():
-                param.requires_grad = False
-        else:
-            for name, param in self.bert_encoder.named_parameters():
-                param.requires_grad = True
-                
+        # Freeze all layers
+        for name, param in self.bert_encoder.named_parameters():
+            param.requires_grad = False            
         
     def forward(self, captions):        
         
