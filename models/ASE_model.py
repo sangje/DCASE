@@ -11,9 +11,7 @@ import numpy as np
 import torch.nn.functional as F
 from tools.utils import l2norm
 from models.AudioEncoder import Cnn10, ResNet38, Cnn14, Wavegram_Logmel_Cnn14
-from models.TextEncoder import BertEncoder #, W2VEncoder
 from models.SBertEncoder import SenBERTEncoder
-from models.BERT_Config import MODELS
 
 import lightning.pytorch as pl
 
@@ -53,18 +51,6 @@ class AudioEnc(pl.LightningModule):
         else:
             for name, param in self.audio_enc.named_parameters():
                 param.requires_grad = True
-        '''        
-        else:
-            for name, param in self.audio_enc.named_parameters():
-                if name.startswith('audio_enc.fc1'):
-                    param.requires_grad=True
-                elif (name.startswith('audio_enc.conv_block6') or name.startswith('audio_enc.conv_block5')
-                      or name.startswith('audio_enc.conv_block4') or name.startswith('audio_enc.conv_block4')):
-                    param.requires_grad=True
-                else:
-                    param.requires_grad=False
-        '''
-   
 
     def forward(self, inputs):
         audio_encoded = self.audio_enc(inputs)
@@ -81,6 +67,7 @@ class ASE(pl.LightningModule):
 
         self.audio_enc = AudioEnc(config)
 
+        # Audio Encoder
         if config.cnn_encoder.model == 'Cnn10':
             self.audio_linear = nn.Sequential(
                 nn.Linear(512, joint_embed),
@@ -101,35 +88,12 @@ class ASE(pl.LightningModule):
                 nn.Linear(joint_embed * 2, joint_embed)
             )
             
-
-        # self.audio_gated_linear = nn.Linear(joint_embed, joint_embed)
-        if config.text_encoder == 'bert':
-            self.text_enc = BertEncoder(config)
-            bert_type = config.bert_encoder.type
-            self.text_linear = nn.Sequential(
-                nn.Linear(MODELS[bert_type][2], joint_embed * 2),
-                nn.ReLU(),
-                nn.Linear(joint_embed * 2, joint_embed)
-            )
-        elif config.text_encoder == 'w2v':
-            self.text_enc = W2VEncoder(config)
-            self.text_linear = nn.Sequential(
-                nn.Linear(300, joint_embed),
-                nn.ReLU(),
-                nn.Linear(joint_embed, joint_embed)
-            )
             
-        elif config.text_encoder == 'sbert':
+        # Text Encoder
+        if config.text_encoder == 'sbert':
             self.text_enc =  SenBERTEncoder(config)
             self.text_linear = nn.Sequential(
-                nn.Linear(768 , joint_embed*2),
-                #nn.Linear(300, joint_embed),
-                nn.ReLU(),
-                nn.Linear(joint_embed*2, joint_embed)
-                #nn.Linear(768, joint_embed),
-                #nn.ReLU()
-                #nn.Linear(joint_embed, joint_embed)
-                
+                nn.Linear(768 , joint_embed)
             )
 
 

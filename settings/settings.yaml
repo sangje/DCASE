@@ -1,18 +1,14 @@
 mode: 'train'
 exp_name: 'exp'
 dataset: 'Clotho'
-text_encoder: 'sbert' #'bert', 'sbert'
-joint_embed: 1024
+text_encoder: 'sbert' # 고정
+joint_embed: 300 # 고정
 
 wav:
   sr: 32000 
   window_size: 1024
   hop_length: 320
   mel_bins: 64
-
-bert_encoder:
-  type: 'bert-base-uncased' #'sentence-transformers/all-MiniLM-L6-v2'
-  freeze: Yes
 
 cnn_encoder:
   model: 'Cnn14' #'ResNet38'
@@ -21,9 +17,9 @@ cnn_encoder:
 
 data:
   batch_size: 64 #64
-  num_workers: 0
-  val_datasets_size: 0 # Do not modify
-  test_datasets_size: 0
+  num_workers: 0 # DDP_spawn 요구사항 0
+  val_datasets_size: 0 # 고정
+  test_datasets_size: 0 # 고정
 
 training:
   margin: 0.2
