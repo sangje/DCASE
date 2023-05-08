@@ -128,7 +128,6 @@ class Task(pl.LightningModule):
         audios, captions, audio_ids, indexs, audio_names = batch
         data_size = self.config.data.val_datasets_size
         audio_embeds, caption_embeds = self.model(audios, captions)
-        print(batch_idx, indexs)
         if self.audio_embs is None:
             self.audio_embs = np.zeros((data_size, audio_embeds.shape[1]))
             self.cap_embs = np.zeros((data_size, caption_embeds.shape[1]))
