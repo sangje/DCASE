@@ -67,7 +67,7 @@ if __name__ == '__main__':
     config.training.epochs = args.epochs
 
     # For CSV file
-    reset_retrievals(config)
+    reset_retrievals()
 
     # Set Up Seed
     seed_everything(config.training.seed, workers=True)
@@ -123,7 +123,7 @@ if __name__ == '__main__':
     
 
     trainer.fit(model=Task, train_dataloaders=train_loader, val_dataloaders=val_loader)
-    reset_retrievals(config)
+    reset_retrievals()
     trainer.test(model=Task, dataloaders=test_loader)
     make_csv(config.caption_names, config.audio_names_, config.top10, csv_output_dir=config.csv_output_dir)
     print('CSV File was completly made at {}!'.format(config.csv_output_dir))
