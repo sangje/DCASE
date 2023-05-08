@@ -4,6 +4,7 @@ import numpy as np
 import torch
 from tqdm import tqdm
 from pathlib import Path
+from torchinfo import summary
 #from loguru import logger
 #from pprint import PrettyPrinter
 #from torch.utils.tensorboard import SummaryWriter
@@ -27,10 +28,10 @@ class Task(pl.LightningModule):
         # setup_seed(config.training.seed)
 
         #Print SubModules of Task
-        print(self.model.audio_enc.summary())
-        print(self.model.audio_linear.summary())
-        print(self.model.text_enc.summary())
-        print(self.model.text_linear.summary())
+        summary(self.model.audio_enc)
+        summary(self.model.audio_linear)
+        summary(self.model.text_enc)
+        summary(self.model.text_linear)
         '''
         This is for logger
 
