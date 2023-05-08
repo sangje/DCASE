@@ -15,7 +15,7 @@ from lightning.pytorch.strategies import DDPStrategy
 from lightning.pytorch.loggers import TensorBoardLogger
 
 # Global Variables
-audio_embs=None  
+audio_embs=None
 cap_embs=None
 audio_names_=None
 caption_names=None
@@ -37,12 +37,6 @@ def reset_retrievals():
 
 if __name__ == '__main__':
     os.environ['TOKENIZERS_PARALLELISM'] = 'false'
-    # Global Variables
-    audio_embs=None  
-    cap_embs=None
-    audio_names_=None
-    caption_names=None
-    top10=None
 
     parser = argparse.ArgumentParser(description='Settings.')
     parser.add_argument('-n', '--exp_name', default='exp_name', type=str,

@@ -33,11 +33,6 @@ class Task(pl.LightningModule):
         summary(self.model.text_enc)
         summary(self.model.text_linear)
 
-        global audio_embs
-        global cap_embs
-        global audio_names_
-        global caption_names
-        global top10
         '''
         This is for logger
 
@@ -205,7 +200,7 @@ class Task(pl.LightningModule):
         global audio_names_
         global caption_names
         global top10
-        
+
         if self.return_ranks:
             r1, r5, r10, mAP10, medr, meanr, ranks, top10 = t2a(audio_embs, cap_embs, return_ranks=True)
         else:
