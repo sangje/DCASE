@@ -127,7 +127,7 @@ class Task(pl.LightningModule):
         audios, captions, audio_ids, indexs, audio_names = batch
         data_size = self.config.data.val_datasets_size
         audio_embeds, caption_embeds = self.model(audios, captions)
-
+        print(batch_idx, indexs)
         if self.audio_embs is None:
             self.audio_embs = np.zeros((data_size, audio_embeds.shape[1]))
             self.cap_embs = np.zeros((data_size, caption_embeds.shape[1]))
@@ -147,7 +147,6 @@ class Task(pl.LightningModule):
         return loss
     
     def on_validation_epoch_end(self):
-        print(self.audio_embs)
         r1, r5, r10, mAP10, medr, meanr = t2a(self.audio_embs, self.cap_embs)
         self.logger.experiment.add_scalars('val_metric',{'r1':r1, 'r5':r5, 'r10':r10, 'mAP10':mAP10, 'medr':medr, 'meanr':meanr})
 
