@@ -40,7 +40,7 @@ class Task(pl.LightningModule):
         self.cap_embs=None
         self.audio_names_=None
         self.caption_names=None
-        self.top10=None
+        
 
         '''
         This is for logger
@@ -124,7 +124,7 @@ class Task(pl.LightningModule):
     #     self.audio_embs, self.cap_embs , self.audio_names_, self.caption_names= None, None, None, None
 
     def on_validation_epoch_start(self):
-        self.audio_embs, self.cap_embs, self.audio_names_, self.caption_names, self.top10 = None, None, None, None, None
+        self.audio_embs, self.cap_embs, self.audio_names_, self.caption_names = None, None, None, None
         
     def validation_step(self, batch, batch_idx):
         audios, captions, audio_ids, indexs, audio_names = batch
