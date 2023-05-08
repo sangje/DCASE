@@ -107,9 +107,9 @@ if __name__ == '__main__':
     
     trainer.fit(model=Task, train_dataloaders=train_loader, val_dataloaders=val_loader)
     trainer.test(model=Task, dataloaders=test_loader)
-    print(Task.caption_names[:5])
-    print(Task.audio_names_[:5])
-    print(Task.top10[:5])
+    print(Task.caption_names)
+    print(Task.audio_names_)
+    print(Task.top10)
     print(Task.csv_output_dir)
 
 
