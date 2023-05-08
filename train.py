@@ -74,7 +74,12 @@ if __name__ == '__main__':
     config.model_output_dir = Path('outputs', folder_name, 'models')
     config.log_output_dir = Path('outputs', folder_name, 'logging')
     config.folder_name = folder_name
-
+    config.log_output_dir.mkdir(parents=True, exist_ok=True)
+    config.model_output_dir.mkdir(parents=True, exist_ok=True)
+    if config.training.csv:
+        config.csv_output_dir = Path('outputs', config.folder_name, 'csv')
+        config.csv_output_dir.mkdir(parents=True, exist_ok=True)
+        
     # set up data loaders
     train_loader = get_dataloader('train', config)
     val_loader = get_dataloader('val', config)

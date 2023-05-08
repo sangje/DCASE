@@ -26,12 +26,6 @@ class Task(pl.LightningModule):
         # setup seed for reproducibility
         # setup_seed(config.training.seed)
 
-        # set up logger
-        config.log_output_dir.mkdir(parents=True, exist_ok=True)
-        config.model_output_dir.mkdir(parents=True, exist_ok=True)
-        if config.training.csv:
-            self.csv_output_dir = Path('outputs', config.folder_name, 'csv')
-            self.csv_output_dir.mkdir(parents=True, exist_ok=True)
         '''
         This is for logger
 
