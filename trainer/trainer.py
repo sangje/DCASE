@@ -177,7 +177,8 @@ class Task(pl.LightningModule):
 
     def on_test_end(self):
         if self.return_ranks:
-            r1, r5, r10, mAP10, medr, meanr, ranks, self.config.top10 = t2a(self.config.audio_embs, self.config.cap_embs, return_ranks=True)
+            r1, r5, r10, mAP10, medr, meanr, ranks, top10 = t2a(self.config.audio_embs, self.config.cap_embs, return_ranks=True)
+            self.config.top10 = top10.copy()
         else:
             r1, r5, r10, mAP10, medr, meanr = t2a(self.config.audio_embs, self.config.cap_embs)
         self.logger.experiment.add_scalars('test_metric',{'r1':r1, 'r5':r5, 'r10':r10, 'mAP10':mAP10, 'medr':medr, 'meanr':meanr})
