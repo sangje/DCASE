@@ -116,13 +116,19 @@ class Task(pl.LightningModule):
                                 "monitor": 'validation_loss',
                                 "frequency": 1}}
 
-    def on_validation_start(self):
-        self.audio_embs, self.cap_embs , self.audio_names_, self.caption_names= None, None, None, None
+    # def on_validation_start(self):
+    #     self.audio_embs, self.cap_embs , self.audio_names_, self.caption_names= None, None, None, None
 
     # def on_validation_epoch_start(self):
     #     self.epoch_loss = AverageMeter()
         
     def validation_step(self, batch, batch_idx):
+        global audio_embs
+        global cap_embs
+        global audio_names_
+        global caption_names
+        global top10
+
         audios, captions, audio_ids, indexs, audio_names = batch
         data_size = self.config.data.val_datasets_size
         audio_embeds, caption_embeds = self.model(audios, captions)
@@ -146,19 +152,31 @@ class Task(pl.LightningModule):
         return loss
     
     def on_validation_epoch_end(self):
+        global audio_embs
+        global cap_embs
+        global audio_names_
+        global caption_names
+        global top10
+
         if self.return_ranks:
             r1, r5, r10, mAP10, medr, meanr, ranks, top10 = t2a(audio_embs, cap_embs, return_ranks=True)
         else:
             r1, r5, r10, mAP10, medr, meanr = t2a(audio_embs, cap_embs)
         self.logger.experiment.add_scalars('val_metric',{'r1':r1, 'r5':r5, 'r10':r10, 'mAP10':mAP10, 'medr':medr, 'meanr':meanr})
 
-    def on_test_start(self):
-        self.on_validation_start()
+    # def on_test_start(self):
+    #     self.on_validation_start()
     
     # def on_test_epoch_start(self):
     #     self.on_validation_epoch_start()
     
     def test_step(self, batch, batch_idx):
+        global audio_embs
+        global cap_embs
+        global audio_names_
+        global caption_names
+        global top10
+
         audios, captions, audio_ids, indexs, audio_names = batch
         data_size = self.config.data.test_datasets_size
         audio_embeds, caption_embeds = self.model(audios, captions)
@@ -182,6 +200,12 @@ class Task(pl.LightningModule):
         return loss
 
     def on_test_end(self):
+        global audio_embs
+        global cap_embs
+        global audio_names_
+        global caption_names
+        global top10
+        
         if self.return_ranks:
             r1, r5, r10, mAP10, medr, meanr, ranks, top10 = t2a(audio_embs, cap_embs, return_ranks=True)
         else:
