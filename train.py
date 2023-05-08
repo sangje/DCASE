@@ -3,7 +3,7 @@ warnings.filterwarnings("ignore")
 import os
 import argparse
 import torch
-from trainer.trainer import Task
+from trainer.trainer import Task, CSVCallback
 from tools.config_loader import get_config
 from pathlib import Path
 from data_handling.DataLoader import get_dataloader
@@ -13,27 +13,6 @@ from lightning.pytorch import LightningModule, Trainer, seed_everything
 from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint
 from lightning.pytorch.strategies import DDPStrategy
 from lightning.pytorch.loggers import TensorBoardLogger
-
-# Global Variables
-audio_embs=None
-cap_embs=None
-audio_names_=None
-caption_names=None
-top10=None
-
-
-def reset_retrievals():
-    global audio_embs
-    global cap_embs
-    global audio_names_
-    global caption_names
-    global top10
-
-    audio_embs=None  
-    cap_embs=None
-    audio_names_=None
-    caption_names=None
-    top10=None
 
 if __name__ == '__main__':
     os.environ['TOKENIZERS_PARALLELISM'] = 'false'
@@ -73,9 +52,6 @@ if __name__ == '__main__':
     config.training.margin = args.margin
     config.training.seed = args.seed
     config.training.epochs = args.epochs
-
-    # For CSV file
-    reset_retrievals()
 
     # Set Up Seed
     seed_everything(config.training.seed, workers=True)
@@ -120,7 +96,7 @@ if __name__ == '__main__':
         strategy='ddp_spawn',
         num_sanity_val_steps=-1,
         sync_batchnorm=True,
-        callbacks=[checkpoint_callback, lr_monitor],
+        callbacks=[CSVCallback(),checkpoint_callback, lr_monitor],
         default_root_dir=config.log_output_dir,
         reload_dataloaders_every_n_epochs=1,
         accumulate_grad_batches=1,
@@ -129,10 +105,7 @@ if __name__ == '__main__':
         limit_val_batches=1
         )
     
-    reset_retrievals()
     trainer.fit(model=Task, train_dataloaders=train_loader, val_dataloaders=val_loader)
-    reset_retrievals()
     trainer.test(model=Task, dataloaders=test_loader)
-    make_csv(config.caption_names, config.audio_names_, config.top10, csv_output_dir=config.csv_output_dir)
-    print('CSV File was completly made at {}!'.format(config.csv_output_dir))
+
 
