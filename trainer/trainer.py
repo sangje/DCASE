@@ -19,17 +19,13 @@ from models.ASE_model import ASE
 import lightning.pytorch as pl
 
 class Task(pl.LightningModule):
-    audio_embs= None  
-    cap_embs= None
-    audio_names_= None
-    caption_names= None
-    top10 = None
 
     def __init__(self, config):
         super().__init__()
         self.config = config
         self.model = ASE(config)
-        self.return_ranks = config.training.csv
+        # self.return_ranks = config.training.csv
+        self.audio_embs, self.cap_embs, self.audio_names_, self.caption_names = None, None, None, None
 
         #Print SubModules of Task
         summary(self.model.audio_enc)
@@ -37,10 +33,10 @@ class Task(pl.LightningModule):
         summary(self.model.text_enc)
         summary(self.model.text_linear)
 
-        #Set-up for CSV file
-        if config.training.csv:
-            self.csv_output_dir = Path('outputs', config.folder_name, 'csv')
-            self.csv_output_dir.mkdir(parents=True, exist_ok=True)
+        # #Set-up for CSV file
+        # if config.training.csv:
+        #     self.csv_output_dir = Path('outputs', config.folder_name, 'csv')
+        #     self.csv_output_dir.mkdir(parents=True, exist_ok=True)
 
 
         '''
@@ -125,42 +121,39 @@ class Task(pl.LightningModule):
     #     self.audio_embs, self.cap_embs , self.audio_names_, self.caption_names= None, None, None, None
 
     def on_validation_epoch_start(self):
-        Task.audio_embs, Task.cap_embs, Task.audio_names_, Task.caption_names, Task.top10 = None, None, None, None, None
+        self.audio_embs, self.cap_embs, self.audio_names_, self.caption_names = None, None, None, None
         
     def validation_step(self, batch, batch_idx):
         audios, captions, audio_ids, indexs, audio_names = batch
         data_size = self.config.data.val_datasets_size
         audio_embeds, caption_embeds = self.model(audios, captions)
 
-        if Task.audio_embs is None:
-            Task.audio_embs = np.zeros((data_size, audio_embeds.shape[1]))
-            Task.cap_embs = np.zeros((data_size, caption_embeds.shape[1]))
-            if self.return_ranks:
-                Task.audio_names_ = np.array([None for i in range(data_size)], dtype=object)
-                Task.caption_names = np.array([None for i in range(data_size)], dtype=object)
+        if self.audio_embs is None:
+            self.audio_embs = np.zeros((data_size, audio_embeds.shape[1]))
+            self.cap_embs = np.zeros((data_size, caption_embeds.shape[1]))
+            # if self.return_ranks:
+            #     Task.audio_names_ = np.array([None for i in range(data_size)], dtype=object)
+            #     Task.caption_names = np.array([None for i in range(data_size)], dtype=object)
         
         loss = self.criterion(audio_embeds, caption_embeds, audio_ids)
         self.log('validation_loss', loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
 
-        Task.audio_embs[indexs] = audio_embeds.cpu().numpy()
-        Task.cap_embs[indexs] = caption_embeds.cpu().numpy()
+        self.audio_embs[indexs] = audio_embeds.cpu().numpy()
+        self.cap_embs[indexs] = caption_embeds.cpu().numpy()
 
-        if self.return_ranks:
-            Task.audio_names_[indexs] = np.array(audio_names)
-            Task.caption_names[indexs] = np.array(captions)
+        # if self.return_ranks:
+        #     Task.audio_names_[indexs] = np.array(audio_names)
+        #     Task.caption_names[indexs] = np.array(captions)
         return loss
     
     def on_validation_epoch_end(self):
-        if self.return_ranks:
-            r1, r5, r10, mAP10, medr, meanr, ranks, Task.top10 = t2a(Task.audio_embs, Task.cap_embs, return_ranks=True)
-            print("Top10 Shape:",Task.top10.shape,"Audio Embeddings:",Task.audio_embs.shape,"Audio Names :",Task.audio_names_.shape)
-        else:
-            r1, r5, r10, mAP10, medr, meanr = t2a(Task.audio_embs, Task.cap_embs)
+        print(self.audio_embs)
+        r1, r5, r10, mAP10, medr, meanr = t2a(self.audio_embs, self.cap_embs)
         self.logger.experiment.add_scalars('val_metric',{'r1':r1, 'r5':r5, 'r10':r10, 'mAP10':mAP10, 'medr':medr, 'meanr':meanr})
 
     # def on_test_start(self):
     #     self.on_validation_start()
-    
+    '''
     def on_test_epoch_start(self):
         self.on_validation_epoch_start()
     
@@ -199,19 +192,4 @@ class Task(pl.LightningModule):
         # call on_test_end() only once after accumulating the results of each process
         if self.trainer.local_rank == 0:
             self.on_test_end()
-
-
-class CSVCallback(pl.Callback):
-    def on_test_end(self, trainer, pl_module):
-
-        # Do something with all test epoch ends.
-        print("CSV File Ready...")
-        make_csv(pl_module.caption_names, pl_module.audio_names_, pl_module.top10, csv_output_dir=pl_module.csv_output_dir)
-        print('CSV File was completly made at {}!'.format(pl_module.csv_output_dir))
-
-        # free up the memory
-        pl_module.caption_names.clear()
-        pl_module.audio_names_.clear()
-        pl_module.audio_embs.clear()
-        pl_module.cap_embs.clear()
-        pl_module.top10.clear()
+'''

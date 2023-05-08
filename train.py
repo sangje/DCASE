@@ -7,7 +7,7 @@ from trainer.trainer import Task, CSVCallback
 from tools.config_loader import get_config
 from pathlib import Path
 from data_handling.DataLoader import get_dataloader
-from tools.make_csvfile import make_csv
+# from tools.make_csvfile import make_csv
 
 from lightning.pytorch import LightningModule, Trainer, seed_everything
 from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint
@@ -66,19 +66,19 @@ if __name__ == '__main__':
     config.folder_name = folder_name
     config.log_output_dir.mkdir(parents=True, exist_ok=True)
     config.model_output_dir.mkdir(parents=True, exist_ok=True)
-    if config.training.csv:
-        config.csv_output_dir = Path('outputs', config.folder_name, 'csv')
-        config.csv_output_dir.mkdir(parents=True, exist_ok=True)
+    # if config.training.csv:
+    #     config.csv_output_dir = Path('outputs', config.folder_name, 'csv')
+    #     config.csv_output_dir.mkdir(parents=True, exist_ok=True)
 
     # set up data loaders
     train_loader = get_dataloader('train', config)
     val_loader = get_dataloader('val', config)
-    test_loader = get_dataloader('test', config)
+    # test_loader = get_dataloader('test', config)
     config.data.val_datasets_size = len(val_loader.dataset)
-    config.data.test_datasets_size = len(test_loader.dataset)
+    # config.data.test_datasets_size = len(test_loader.dataset)
     print(f'Size of training set: {len(train_loader.dataset)}, size of batches: {len(train_loader)}')
     print(f'Size of validation set: {len(val_loader.dataset)}, size of batches: {len(val_loader)}')
-    print(f'Size of test set: {len(test_loader.dataset)}, size of batches: {len(test_loader)}')
+    # print(f'Size of test set: {len(test_loader.dataset)}, size of batches: {len(test_loader)}')
     
     # Model Defined
     Task=Task(config)
@@ -106,15 +106,7 @@ if __name__ == '__main__':
         )
     
     trainer.fit(model=Task, train_dataloaders=train_loader, val_dataloaders=val_loader)
-    print(Task.caption_names)
-    print(Task.audio_names_)
-    print(Task.top10)
-    print(Task.csv_output_dir)
-    
-    trainer.test(model=Task, dataloaders=test_loader)
-    print(Task.caption_names)
-    print(Task.audio_names_)
-    print(Task.top10)
-    print(Task.csv_output_dir)
+    # trainer.test(model=Task, dataloaders=test_loader)
+
 
 

@@ -23,7 +23,7 @@ data:
 
 training:
   margin: 0.2
-  freeze: Yes
+  freeze: No
   loss: ntxent  # 'infonce' 'triplet', 'weight', 'ntxent', 'bidirect'
   spec_augmentation: Yes
   epochs: 50
@@ -33,7 +33,7 @@ training:
   resume: No
   l2_norm: Yes
   dropout: 0.2
-  csv: True
+  csv: False
 
 path:
   vocabulary: 'data/{}/pickles/words_list.p'
