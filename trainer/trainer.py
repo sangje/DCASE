@@ -36,11 +36,11 @@ class Task(pl.LightningModule):
         if config.training.csv:
             self.csv_output_dir = Path('outputs', config.folder_name, 'csv')
             self.csv_output_dir.mkdir(parents=True, exist_ok=True)
-        self.audio_embs=None  
-        self.cap_embs=None
-        self.audio_names_=None
-        self.caption_names=None
-        
+        self.audio_embs= None  
+        self.cap_embs= None
+        self.audio_names_= None
+        self.caption_names= None
+        self.top10 = None
 
         '''
         This is for logger
@@ -124,7 +124,7 @@ class Task(pl.LightningModule):
     #     self.audio_embs, self.cap_embs , self.audio_names_, self.caption_names= None, None, None, None
 
     def on_validation_epoch_start(self):
-        self.audio_embs, self.cap_embs, self.audio_names_, self.caption_names = None, None, None, None
+        self.audio_embs, self.cap_embs, self.audio_names_, self.caption_names, self.top10 = None, None, None, None, None
         
     def validation_step(self, batch, batch_idx):
         audios, captions, audio_ids, indexs, audio_names = batch
@@ -188,6 +188,7 @@ class Task(pl.LightningModule):
     def on_test_end(self):
         if self.return_ranks:
             r1, r5, r10, mAP10, medr, meanr, ranks, self.top10 = t2a(self.audio_embs, self.cap_embs, return_ranks=True)
+            print(self.top10[:5])
         else:
             r1, r5, r10, mAP10, medr, meanr = t2a(self.audio_embs, self.cap_embs)
         self.logger.experiment.add_scalars('test_metric',{'r1':r1, 'r5':r5, 'r10':r10, 'mAP10':mAP10, 'medr':medr, 'meanr':meanr})
@@ -197,6 +198,7 @@ class CSVCallback(pl.Callback):
     def on_test_end(self, trainer, pl_module):
 
         # Do something with all test epoch ends.
+        print("CSV File Ready...")
         make_csv(pl_module.caption_names, pl_module.audio_names_, pl_module.top10, csv_output_dir=pl_module.csv_output_dir)
         print('CSV File was completly made at {}!'.format(pl_module.csv_output_dir))
 
