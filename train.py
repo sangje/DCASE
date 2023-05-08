@@ -102,7 +102,6 @@ if __name__ == '__main__':
         accumulate_grad_batches=1,
         log_every_n_steps=1,
         limit_train_batches=1,
-        limit_val_batches=1
         )
     
     trainer.fit(model=Task, train_dataloaders=train_loader, val_dataloaders=val_loader)
