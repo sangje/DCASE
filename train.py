@@ -3,7 +3,7 @@ warnings.filterwarnings("ignore")
 import os
 import argparse
 import torch
-from trainer.trainer import Task, CSVCallback
+from trainer.trainer import Task
 from tools.config_loader import get_config
 from pathlib import Path
 from data_handling.DataLoader import get_dataloader
