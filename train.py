@@ -14,12 +14,18 @@ from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint
 from lightning.pytorch.strategies import DDPStrategy
 from lightning.pytorch.loggers import TensorBoardLogger
 
-def reset_retrievals(config):
-    config.audio_embs=None  
-    config.cap_embs=None
-    config.audio_namees_=None
-    config.caption_names=None
-    config.top10=None
+global audio_embs
+global cap_embs
+global audio_names_
+global caption_names
+global top10
+
+def reset_retrievals():
+    audio_embs=None  
+    cap_embs=None
+    audio_names_=None
+    caption_names=None
+    top10=None
 
 if __name__ == '__main__':
     os.environ['TOKENIZERS_PARALLELISM'] = 'false'
