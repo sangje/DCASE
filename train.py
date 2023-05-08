@@ -88,12 +88,12 @@ if __name__ == '__main__':
         filename="{epoch}", dirpath=config.model_output_dir)
     lr_monitor = LearningRateMonitor(logging_interval='step')
 
-    ddp_strategy = DDPStrategy(find_unused_parameters=False)
+    ddp_strategy = DDPStrategy(find_unused_parameters=True)
 
     trainer = Trainer(
         logger=TensorBoardLogger(save_dir=config.log_output_dir),
         max_epochs=config.training.epochs,
-        strategy='ddp_spawn',
+        strategy=ddp_strategy,
         num_sanity_val_steps=-1,
         sync_batchnorm=True,
         callbacks=[checkpoint_callback, lr_monitor],
