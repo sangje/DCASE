@@ -96,7 +96,7 @@ if __name__ == '__main__':
         strategy='ddp_spawn',
         num_sanity_val_steps=-1,
         sync_batchnorm=True,
-        callbacks=[CSVCallback(),checkpoint_callback, lr_monitor],
+        callbacks=[checkpoint_callback, lr_monitor],
         default_root_dir=config.log_output_dir,
         reload_dataloaders_every_n_epochs=1,
         accumulate_grad_batches=1,
@@ -107,5 +107,9 @@ if __name__ == '__main__':
     
     trainer.fit(model=Task, train_dataloaders=train_loader, val_dataloaders=val_loader)
     trainer.test(model=Task, dataloaders=test_loader)
+    print(Task.caption_names[:5])
+    print(Task.audio_names_[:5])
+    print(Task.top10[:5])
+    print(Task.csv_output_dir)
 
 
