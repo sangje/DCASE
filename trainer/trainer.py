@@ -22,6 +22,7 @@ class Task(pl.LightningModule):
 
     def __init__(self, config):
         super().__init__()
+        self.save_hyperparameters(config)
         self.config = config
         self.model = ASE(config)
         # self.return_ranks = config.training.csv
