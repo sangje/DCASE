@@ -197,7 +197,7 @@ class Task(pl.LightningModule):
     
     def on_after_backward(self):
         # call on_test_end() only once after accumulating the results of each process
-        if self.trainer.use_ddp and self.trainer.local_rank == 0:
+        if self.trainer.local_rank == 0:
             self.on_test_end()
 
 
