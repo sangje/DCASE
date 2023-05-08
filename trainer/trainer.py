@@ -132,7 +132,7 @@ class Task(pl.LightningModule):
         data_size = self.config.data.val_datasets_size
         audio_embeds, caption_embeds = self.model(audios, captions)
 
-        if audio_embs is None:
+        if Task.audio_embs is None:
             Task.audio_embs = np.zeros((data_size, audio_embeds.shape[1]))
             Task.cap_embs = np.zeros((data_size, caption_embeds.shape[1]))
             if self.return_ranks:
