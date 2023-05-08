@@ -79,7 +79,7 @@ if __name__ == '__main__':
     if config.training.csv:
         config.csv_output_dir = Path('outputs', config.folder_name, 'csv')
         config.csv_output_dir.mkdir(parents=True, exist_ok=True)
-        
+
     # set up data loaders
     train_loader = get_dataloader('train', config)
     val_loader = get_dataloader('val', config)
@@ -92,6 +92,12 @@ if __name__ == '__main__':
     
     # Model Defined
     Task=Task(config)
+
+    #Print SubModules of Task
+    print(Task.audio_enc.summary())
+    print(Task.audio_linear.summary())
+    print(Task.text_enc.summary())
+    print(Task.text_linear.summary())
 
     # Checkpoint and LR Monitoring
     checkpoint_callback = ModelCheckpoint(monitor='validation_loss',
