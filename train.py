@@ -14,6 +14,12 @@ from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint
 from lightning.pytorch.strategies import DDPStrategy
 from lightning.pytorch.loggers import TensorBoardLogger
 
+# Global Variables
+audio_embs=None  
+cap_embs=None
+audio_names_=None
+caption_names=None
+top10=None
 
 
 def reset_retrievals():
@@ -129,7 +135,7 @@ if __name__ == '__main__':
         limit_val_batches=1
         )
     
-
+    reset_retrievals()
     trainer.fit(model=Task, train_dataloaders=train_loader, val_dataloaders=val_loader)
     reset_retrievals()
     trainer.test(model=Task, dataloaders=test_loader)
