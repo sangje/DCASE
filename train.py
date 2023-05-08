@@ -22,7 +22,7 @@ def reset_retrievals():
     global audio_names_
     global caption_names
     global top10
-    
+
     audio_embs=None  
     cap_embs=None
     audio_names_=None
@@ -31,6 +31,12 @@ def reset_retrievals():
 
 if __name__ == '__main__':
     os.environ['TOKENIZERS_PARALLELISM'] = 'false'
+    # Global Variables
+    audio_embs=None  
+    cap_embs=None
+    audio_names_=None
+    caption_names=None
+    top10=None
 
     parser = argparse.ArgumentParser(description='Settings.')
     parser.add_argument('-n', '--exp_name', default='exp_name', type=str,
