@@ -7,12 +7,19 @@ from trainer.trainer import Task
 from tools.config_loader import get_config
 from pathlib import Path
 from data_handling.DataLoader import get_dataloader
+from tools.make_csvfile import make_csv
 
 from lightning.pytorch import LightningModule, Trainer, seed_everything
 from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint
 from lightning.pytorch.strategies import DDPStrategy
 from lightning.pytorch.loggers import TensorBoardLogger
 
+def reset_retrievals(config):
+    config.audio_embs=None  
+    config.cap_embs=None
+    config.audio_namees_=None
+    config.caption_names=None
+    config.top10=None
 
 if __name__ == '__main__':
     os.environ['TOKENIZERS_PARALLELISM'] = 'false'
@@ -52,6 +59,9 @@ if __name__ == '__main__':
     config.training.margin = args.margin
     config.training.seed = args.seed
     config.training.epochs = args.epochs
+
+    # For CSV file
+    reset_retrievals(config)
 
     # Set Up Seed
     seed_everything(config.training.seed, workers=True)
@@ -102,4 +112,8 @@ if __name__ == '__main__':
     
 
     trainer.fit(model=Task, train_dataloaders=train_loader, val_dataloaders=val_loader)
+    reset_retrievals(config)
     trainer.test(model=Task, dataloaders=test_loader)
+    make_csv(config.caption_names, config.audio_names_, config.top10, csv_output_dir=config.csv_output_dir)
+    print('CSV File was completly made at {}!'.format(config.csv_output_dir))
+
