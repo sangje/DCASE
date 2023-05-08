@@ -19,6 +19,11 @@ from models.ASE_model import ASE
 import lightning.pytorch as pl
 
 class Task(pl.LightningModule):
+    audio_embs= None  
+    cap_embs= None
+    audio_names_= None
+    caption_names= None
+    top10 = None
 
     def __init__(self, config):
         super().__init__()
@@ -36,11 +41,7 @@ class Task(pl.LightningModule):
         if config.training.csv:
             self.csv_output_dir = Path('outputs', config.folder_name, 'csv')
             self.csv_output_dir.mkdir(parents=True, exist_ok=True)
-        self.audio_embs= None  
-        self.cap_embs= None
-        self.audio_names_= None
-        self.caption_names= None
-        self.top10 = None
+
 
         '''
         This is for logger
@@ -124,36 +125,36 @@ class Task(pl.LightningModule):
     #     self.audio_embs, self.cap_embs , self.audio_names_, self.caption_names= None, None, None, None
 
     def on_validation_epoch_start(self):
-        self.audio_embs, self.cap_embs, self.audio_names_, self.caption_names, self.top10 = None, None, None, None, None
+        Task.audio_embs, Task.cap_embs, Task.audio_names_, Task.caption_names, Task.top10 = None, None, None, None, None
         
     def validation_step(self, batch, batch_idx):
         audios, captions, audio_ids, indexs, audio_names = batch
         data_size = self.config.data.val_datasets_size
         audio_embeds, caption_embeds = self.model(audios, captions)
 
-        if self.audio_embs is None:
-            self.audio_embs = np.zeros((data_size, audio_embeds.shape[1]))
-            self.cap_embs = np.zeros((data_size, caption_embeds.shape[1]))
+        if audio_embs is None:
+            Task.audio_embs = np.zeros((data_size, audio_embeds.shape[1]))
+            Task.cap_embs = np.zeros((data_size, caption_embeds.shape[1]))
             if self.return_ranks:
-                self.audio_names_ = np.array([None for i in range(data_size)], dtype=object)
-                self.caption_names = np.array([None for i in range(data_size)], dtype=object)
+                Task.audio_names_ = np.array([None for i in range(data_size)], dtype=object)
+                Task.caption_names = np.array([None for i in range(data_size)], dtype=object)
         
         loss = self.criterion(audio_embeds, caption_embeds, audio_ids)
         self.log('validation_loss', loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
 
-        self.audio_embs[indexs] = audio_embeds.cpu().numpy()
-        self.cap_embs[indexs] = caption_embeds.cpu().numpy()
+        Task.audio_embs[indexs] = audio_embeds.cpu().numpy()
+        Task.cap_embs[indexs] = caption_embeds.cpu().numpy()
 
         if self.return_ranks:
-            self.audio_names_[indexs] = np.array(audio_names)
-            self.caption_names[indexs] = np.array(captions)
+            Task.audio_names_[indexs] = np.array(audio_names)
+            Task.caption_names[indexs] = np.array(captions)
         return loss
     
     def on_validation_epoch_end(self):
         if self.return_ranks:
-            r1, r5, r10, mAP10, medr, meanr, ranks, self.top10 = t2a(self.audio_embs, self.cap_embs, return_ranks=True)
+            r1, r5, r10, mAP10, medr, meanr, ranks, Task.top10 = t2a(Task.audio_embs, Task.cap_embs, return_ranks=True)
         else:
-            r1, r5, r10, mAP10, medr, meanr = t2a(self.audio_embs, self.cap_embs)
+            r1, r5, r10, mAP10, medr, meanr = t2a(Task.audio_embs, Task.cap_embs)
         self.logger.experiment.add_scalars('val_metric',{'r1':r1, 'r5':r5, 'r10':r10, 'mAP10':mAP10, 'medr':medr, 'meanr':meanr})
 
     # def on_test_start(self):
@@ -167,30 +168,30 @@ class Task(pl.LightningModule):
         data_size = self.config.data.test_datasets_size
         audio_embeds, caption_embeds = self.model(audios, captions)
 
-        if self.audio_embs is None:
-            self.audio_embs = np.zeros((data_size, audio_embeds.shape[1]))
-            self.cap_embs = np.zeros((data_size, caption_embeds.shape[1]))
+        if Task.audio_embs is None:
+            Task.audio_embs = np.zeros((data_size, audio_embeds.shape[1]))
+            Task.cap_embs = np.zeros((data_size, caption_embeds.shape[1]))
             if self.return_ranks:
-                self.audio_names_ = np.array([None for i in range(data_size)],dtype=object)
-                self.caption_names = np.array([None for i in range(data_size)],dtype=object)
+                Task.audio_names_ = np.array([None for i in range(data_size)],dtype=object)
+                Task.caption_names = np.array([None for i in range(data_size)],dtype=object)
         
         loss = self.criterion(audio_embeds, caption_embeds, audio_ids)
         self.log('test_loss', loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
 
-        self.audio_embs[indexs] = audio_embeds.cpu().numpy()
-        self.cap_embs[indexs] = caption_embeds.cpu().numpy()
+        Task.audio_embs[indexs] = audio_embeds.cpu().numpy()
+        Task.cap_embs[indexs] = caption_embeds.cpu().numpy()
 
         if self.return_ranks:
-            self.audio_names_[indexs] = np.array(audio_names)
-            self.caption_names[indexs] = np.array(captions)
+            Task.audio_names_[indexs] = np.array(audio_names)
+            Task.caption_names[indexs] = np.array(captions)
         return loss
 
     def on_test_end(self):
         if self.return_ranks:
-            r1, r5, r10, mAP10, medr, meanr, ranks, self.top10 = t2a(self.audio_embs, self.cap_embs, return_ranks=True)
-            print(self.top10[:5])
+            r1, r5, r10, mAP10, medr, meanr, ranks, Task.top10 = t2a(Task.audio_embs, Task.cap_embs, return_ranks=True)
+            print("Top10 Shape:",Task.top10.shape)
         else:
-            r1, r5, r10, mAP10, medr, meanr = t2a(self.audio_embs, self.cap_embs)
+            r1, r5, r10, mAP10, medr, meanr = t2a(Task.audio_embs, Task.cap_embs)
         self.logger.experiment.add_scalars('test_metric',{'r1':r1, 'r5':r5, 'r10':r10, 'mAP10':mAP10, 'medr':medr, 'meanr':meanr})
 
 
