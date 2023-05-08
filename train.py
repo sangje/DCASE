@@ -14,13 +14,15 @@ from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint
 from lightning.pytorch.strategies import DDPStrategy
 from lightning.pytorch.loggers import TensorBoardLogger
 
-global audio_embs
-global cap_embs
-global audio_names_
-global caption_names
-global top10
+
 
 def reset_retrievals():
+    global audio_embs
+    global cap_embs
+    global audio_names_
+    global caption_names
+    global top10
+    
     audio_embs=None  
     cap_embs=None
     audio_names_=None
