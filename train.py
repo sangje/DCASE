@@ -93,12 +93,6 @@ if __name__ == '__main__':
     # Model Defined
     Task=Task(config)
 
-    #Print SubModules of Task
-    print(Task.audio_enc.summary())
-    print(Task.audio_linear.summary())
-    print(Task.text_enc.summary())
-    print(Task.text_linear.summary())
-
     # Checkpoint and LR Monitoring
     checkpoint_callback = ModelCheckpoint(monitor='validation_loss',
         filename="{epoch}", dirpath=config.model_output_dir)

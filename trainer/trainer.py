@@ -26,6 +26,11 @@ class Task(pl.LightningModule):
         # setup seed for reproducibility
         # setup_seed(config.training.seed)
 
+        #Print SubModules of Task
+        print(self.model.audio_enc.summary())
+        print(self.model.audio_linear.summary())
+        print(self.model.text_enc.summary())
+        print(self.model.text_linear.summary())
         '''
         This is for logger
 
