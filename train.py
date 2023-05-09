@@ -105,7 +105,6 @@ if __name__ == '__main__':
         reload_dataloaders_every_n_epochs=1,
         accumulate_grad_batches=1,
         log_every_n_steps=1,
-        devices=(torch.cuda.device_count(),1)
         )
     
     trainer.fit(model=Task, train_dataloaders=train_loader, val_dataloaders=val_loader)
