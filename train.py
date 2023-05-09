@@ -63,9 +63,13 @@ if __name__ == '__main__':
                                                 config.training.seed)
     config.model_output_dir = Path('outputs', folder_name, 'models')
     config.log_output_dir = Path('outputs', folder_name, 'logging')
+    config.pickle_output_dir = Path('outputs', folder_name, 'pickle')
     config.folder_name = folder_name
     config.log_output_dir.mkdir(parents=True, exist_ok=True)
     config.model_output_dir.mkdir(parents=True, exist_ok=True)
+    config.pickle_output_dir.mkdir(parents=True, exist_ok=True)
+
+
     # if config.training.csv:
     #     config.csv_output_dir = Path('outputs', config.folder_name, 'csv')
     #     config.csv_output_dir.mkdir(parents=True, exist_ok=True)
@@ -101,6 +105,7 @@ if __name__ == '__main__':
         reload_dataloaders_every_n_epochs=1,
         accumulate_grad_batches=1,
         log_every_n_steps=1,
+        gpus=(torch.cuda.device_count(),1)
         )
     
     trainer.fit(model=Task, train_dataloaders=train_loader, val_dataloaders=val_loader)

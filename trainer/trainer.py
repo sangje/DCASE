@@ -12,7 +12,7 @@ from tools.utils import setup_seed, AverageMeter, a2t, t2a
 from tools.loss import BiDirectionalRankingLoss, TripletLoss, NTXent
 from tools.info_loss import InFoNCELoss
 from tools.make_csvfile import make_csv
-
+import pickle
 
 from models.ASE_model import ASE
 
@@ -26,7 +26,11 @@ class Task(pl.LightningModule):
         self.config = config
         self.model = ASE(config)
         # self.return_ranks = config.training.csv
-        self.audio_embs, self.cap_embs, self.audio_names_, self.caption_names = None, None, None, None
+        self.pickle_output_path=Path(config.pickle_output_dir,'temporal_embeddings.pkl')
+
+        temporal_dict={'audio_embs':None, 'cap_embs':None, 'audio_names_':None, 'caption_names':None}
+        with open(self.pickle_output_path, 'wb') as f:  
+            pickle.dump(temporal_dict,f, protocol=pickle.HIGHEST_PROTOCOL)
 
         #Print SubModules of Task
         summary(self.model.audio_enc)
@@ -105,7 +109,7 @@ class Task(pl.LightningModule):
         audio_embeds, caption_embeds = self.model(audios, captions)
 
         loss = self.criterion(audio_embeds, caption_embeds, audio_ids)
-        self.log('train_loss',loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        self.log('train_loss',loss, on_step=False, on_epoch=True, prog_bar=True, logger=True)
         return loss
 
     def configure_optimizers(self):
@@ -122,32 +126,37 @@ class Task(pl.LightningModule):
     #     self.audio_embs, self.cap_embs , self.audio_names_, self.caption_names= None, None, None, None
 
     def on_validation_epoch_start(self):
-        self.audio_embs, self.cap_embs, self.audio_names_, self.caption_names = None, None, None, None
+        temporal_dict={'audio_embs':None, 'cap_embs':None, 'audio_names_':None, 'caption_names':None}
+        with open(self.pickle_output_path, 'wb') as f:  
+            pickle.dump(temporal_dict,f, protocol=pickle.HIGHEST_PROTOCOL)
         
     def validation_step(self, batch, batch_idx):
+        with open(self.pickle_output_path, 'rb') as f:  
+            temporal_dict=pickle.load(f)
+        # Tensor(N,E), list, Tensor(N), array, list
         audios, captions, audio_ids, indexs, audio_names = batch
         data_size = self.config.data.val_datasets_size
         audio_embeds, caption_embeds = self.model(audios, captions)
-        if self.audio_embs is None:
-            self.audio_embs = np.zeros((data_size, audio_embeds.shape[1]))
-            self.cap_embs = np.zeros((data_size, caption_embeds.shape[1]))
+        if temporal_dict['audio_embs'] is None:
+            temporal_dict['audio_embs'] = np.zeros((data_size, audio_embeds.shape[1]))
+            temporal_dict['cap_embs'] = np.zeros((data_size, caption_embeds.shape[1]))
             # if self.return_ranks:
             #     Task.audio_names_ = np.array([None for i in range(data_size)], dtype=object)
             #     Task.caption_names = np.array([None for i in range(data_size)], dtype=object)
         
         loss = self.criterion(audio_embeds, caption_embeds, audio_ids)
-        self.log('validation_loss', loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
-        self.logger.experiment.add_scalar('loss/val_loss',loss,self.current_epoch)
-        self.audio_embs[indexs] = audio_embeds.cpu().numpy()
-        self.cap_embs[indexs] = caption_embeds.cpu().numpy()
+        self.log('validation_loss', loss, on_step=False, on_epoch=True, prog_bar=True, logger=True)
+        temporal_dict['audio_embs'][indexs] = audio_embeds.cpu().numpy()
+        temporal_dict['cap_embs'][indexs] = caption_embeds.cpu().numpy()
 
-        # if self.return_ranks:
-        #     Task.audio_names_[indexs] = np.array(audio_names)
-        #     Task.caption_names[indexs] = np.array(captions)
+        with open(self.pickle_output_path, 'wb') as f:  
+            pickle.dump(temporal_dict,f, protocol=pickle.HIGHEST_PROTOCOL)
         return loss
     
     def on_validation_epoch_end(self):
-        r1, r5, r10, mAP10, medr, meanr = t2a(self.audio_embs, self.cap_embs)
+        with open(self.pickle_output_path, 'rb') as f:  
+            temporal_dict=pickle.load(f)
+        r1, r5, r10, mAP10, medr, meanr = t2a(temporal_dict['auido_embs'], temporal_dict['cap_embs'])
         self.logger.experiment.add_scalars('val_metric',{'r1':r1, 'r5':r5, 'r10':r10, 'mAP10':mAP10, 'medr':medr, 'meanr':meanr},self.current_epoch)
 
     # def on_test_start(self):
