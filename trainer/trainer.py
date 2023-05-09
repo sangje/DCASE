@@ -203,5 +203,5 @@ class Task(pl.LightningModule):
     def on_test_end(self):
         with open(self.pickle_output_path, 'rb') as f:  
             temporal_dict=pickle.load(f)
-        r1, r5, r10, mAP10, medr, meanr = t2a(temporal_dict['auido_embs'], temporal_dict['cap_embs'])
+        r1, r5, r10, mAP10, medr, meanr = t2a(temporal_dict['audio_embs'], temporal_dict['cap_embs'])
         self.logger.experiment.add_scalars('metric',{'r1':r1, 'r5':r5, 'r10':r10, 'mAP10':mAP10, 'medr':medr, 'meanr':meanr},self.current_epoch)
