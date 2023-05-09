@@ -89,7 +89,7 @@ if __name__ == '__main__':
 
     # Checkpoint and LR Monitoring
     checkpoint_callback = ModelCheckpoint(monitor='validation_loss',
-        filename="best_checkpoint", dirpath=config.model_output_dir)
+        filename={"best_checkpoint"}, dirpath=config.model_output_dir)
     lr_monitor = LearningRateMonitor(logging_interval='step')
 
     ddp_strategy = DDPStrategy(find_unused_parameters=True)
@@ -120,7 +120,7 @@ if __name__ == '__main__':
             accelerator="gpu",
             devices=1
         )
-        test_model = Task(config).load_from_checkpoint(Path(config.model_output_dir,"best_checkpoint.ckpt"))
+        test_model = Task.load_from_checkpoint(Path(config.model_output_dir,"best_checkpoint.ckpt"))
         trainer.test(model=test_model, dataloaders=test_loader)
 
 
