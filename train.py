@@ -120,8 +120,8 @@ if __name__ == '__main__':
             accelerator="gpu",
             devices=1
         )
-        model = Task.load_from_checkpoint(Path(config.model_output_dir,"best_checkpoint.ckpt"))
-        trainer.test(model=Task, dataloaders=test_loader)
+        model = Task(config).load_from_checkpoint(Path(config.model_output_dir,"best_checkpoint.ckpt"))
+        trainer.test(model=model, dataloaders=test_loader)
 
 
 
