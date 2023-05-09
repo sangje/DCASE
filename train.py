@@ -89,7 +89,7 @@ if __name__ == '__main__':
 
     # Checkpoint and LR Monitoring
     checkpoint_callback = ModelCheckpoint(monitor='validation_loss',
-        filename="{epoch}", dirpath=config.model_output_dir)
+        filename="best_checkpoint", dirpath=config.model_output_dir)
     lr_monitor = LearningRateMonitor(logging_interval='step')
 
     ddp_strategy = DDPStrategy(find_unused_parameters=True)
@@ -109,14 +109,19 @@ if __name__ == '__main__':
     
     trainer.fit(model=Task, train_dataloaders=train_loader, val_dataloaders=val_loader)
     
-    # Batch Size 12 for Testing.
-    config.data.batch_size=12
-    test_loader = get_dataloader('val', config)
-    trainer = Trainer(
-        logger=TensorBoardLogger(save_dir=config.log_output_dir),
-        accelerator="cpu"
+
+    torch.distributed.destroy_process_group()
+    if trainer.is_global_zero:
+        # Batch Size 12 for Testing.
+        config.data.batch_size=12
+        test_loader = get_dataloader('val', config)
+        trainer = Trainer(
+            logger=TensorBoardLogger(save_dir=config.log_output_dir),
+            accelerator="gpu",
+            devices=1
         )
-    trainer.test(model=Task, dataloaders=test_loader)
+        model = Task.load_from_checkpoint(Path(config.model_output_dir,"best_checkpoint.ckpt"))
+        trainer.test(model=Task, dataloaders=test_loader)
 
 
 
