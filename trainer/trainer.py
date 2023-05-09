@@ -194,8 +194,8 @@ class Task(pl.LightningModule):
             # if self.return_ranks:
             #     Task.audio_names_ = np.array([None for i in range(data_size)], dtype=object)
             #     Task.caption_names = np.array([None for i in range(data_size)], dtype=object)
-        temporal_dict['audio_embs'][indexs] = audio_embeds.cpu().numpy()
-        temporal_dict['cap_embs'][indexs] = caption_embeds.cpu().numpy()
+        temporal_dict['audio_embs'][indexs] = audio_embeds.numpy()
+        temporal_dict['cap_embs'][indexs] = caption_embeds.numpy()
 
         with open(self.pickle_output_path, 'wb') as f:  
             pickle.dump(temporal_dict,f, protocol=pickle.HIGHEST_PROTOCOL)

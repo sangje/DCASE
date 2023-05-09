@@ -115,7 +115,7 @@ if __name__ == '__main__':
     trainer = Trainer(
         logger=TensorBoardLogger(save_dir=config.log_output_dir),
         devices=1,
-        accelerator="gpu"
+        accelerator="cpu"
         )
     trainer.test(model=Task, dataloaders=test_loader)
 
