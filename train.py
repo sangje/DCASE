@@ -120,7 +120,9 @@ if __name__ == '__main__':
             accelerator="gpu",
             devices=1
         )
-        test_model = Task.load_from_checkpoint(Path(config.model_output_dir,"best_checkpoint.ckpt"))
+        checkpoint = torch.load(Path(config.model_output_dir,"best_checkpoint.ckpt"))
+        test_model = Task(config)
+        test_model.load_state_dict(checkpoint['state_dict'])
         trainer.test(model=test_model, dataloaders=test_loader)
 
 
