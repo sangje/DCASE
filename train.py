@@ -85,7 +85,7 @@ if __name__ == '__main__':
     # print(f'Size of test set: {len(test_loader.dataset)}, size of batches: {len(test_loader)}')
     
     # Model Defined
-    Task=Task(config)
+    train_model=Task(config)
 
     # Checkpoint and LR Monitoring
     checkpoint_callback = ModelCheckpoint(monitor='validation_loss',
@@ -107,7 +107,7 @@ if __name__ == '__main__':
         log_every_n_steps=1,
         )
     
-    trainer.fit(model=Task, train_dataloaders=train_loader, val_dataloaders=val_loader)
+    trainer.fit(model=train_model, train_dataloaders=train_loader, val_dataloaders=val_loader)
     
 
     torch.distributed.destroy_process_group()
@@ -120,8 +120,8 @@ if __name__ == '__main__':
             accelerator="gpu",
             devices=1
         )
-        model = Task(config).load_from_checkpoint(Path(config.model_output_dir,"best_checkpoint.ckpt"))
-        trainer.test(model=model, dataloaders=test_loader)
+        test_model = Task(config).load_from_checkpoint(Path(config.model_output_dir,"best_checkpoint.ckpt"))
+        trainer.test(model=test_model, dataloaders=test_loader)
 
 
 
