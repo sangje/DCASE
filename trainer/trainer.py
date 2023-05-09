@@ -28,10 +28,6 @@ class Task(pl.LightningModule):
         # self.return_ranks = config.training.csv
         self.pickle_output_path=Path(config.pickle_output_dir,'temporal_embeddings.pkl')
 
-        temporal_dict={'audio_embs':None, 'cap_embs':None, 'audio_names_':None, 'caption_names':None}
-        with open(self.pickle_output_path, 'wb') as f:  
-            pickle.dump(temporal_dict,f, protocol=pickle.HIGHEST_PROTOCOL)
-
         #Print SubModules of Task
         summary(self.model.audio_enc)
         summary(self.model.audio_linear)
@@ -124,40 +120,19 @@ class Task(pl.LightningModule):
 
     # def on_validation_start(self):
     #     self.audio_embs, self.cap_embs , self.audio_names_, self.caption_names= None, None, None, None
-
-    def on_validation_epoch_start(self):
-        temporal_dict={'audio_embs':None, 'cap_embs':None, 'audio_names_':None, 'caption_names':None}
-        with open(self.pickle_output_path, 'wb') as f:  
-            pickle.dump(temporal_dict,f, protocol=pickle.HIGHEST_PROTOCOL)
         
     def validation_step(self, batch, batch_idx):
-        with open(self.pickle_output_path, 'rb') as f:  
-            temporal_dict=pickle.load(f)
         # Tensor(N,E), list, Tensor(N), array, list
         audios, captions, audio_ids, indexs, audio_names = batch
         data_size = self.config.data.val_datasets_size
         audio_embeds, caption_embeds = self.model(audios, captions)
-        if temporal_dict['audio_embs'] is None:
-            temporal_dict['audio_embs'] = np.zeros((data_size, audio_embeds.shape[1]))
-            temporal_dict['cap_embs'] = np.zeros((data_size, caption_embeds.shape[1]))
             # if self.return_ranks:
             #     Task.audio_names_ = np.array([None for i in range(data_size)], dtype=object)
             #     Task.caption_names = np.array([None for i in range(data_size)], dtype=object)
         
         loss = self.criterion(audio_embeds, caption_embeds, audio_ids)
         self.log('validation_loss', loss, on_step=False, on_epoch=True, prog_bar=True, logger=True)
-        temporal_dict['audio_embs'][indexs] = audio_embeds.cpu().numpy()
-        temporal_dict['cap_embs'][indexs] = caption_embeds.cpu().numpy()
-
-        with open(self.pickle_output_path, 'wb') as f:  
-            pickle.dump(temporal_dict,f, protocol=pickle.HIGHEST_PROTOCOL)
         return loss
-    
-    def on_validation_epoch_end(self):
-        with open(self.pickle_output_path, 'rb') as f:  
-            temporal_dict=pickle.load(f)
-        r1, r5, r10, mAP10, medr, meanr = t2a(temporal_dict['auido_embs'], temporal_dict['cap_embs'])
-        self.logger.experiment.add_scalars('val_metric',{'r1':r1, 'r5':r5, 'r10':r10, 'mAP10':mAP10, 'medr':medr, 'meanr':meanr},self.current_epoch)
 
     # def on_test_start(self):
     #     self.on_validation_start()
@@ -201,3 +176,32 @@ class Task(pl.LightningModule):
         if self.trainer.local_rank == 0:
             self.on_test_end()
 '''
+    def on_test_start(self):
+        temporal_dict={'audio_embs':None, 'cap_embs':None, 'audio_names_':None, 'caption_names':None}
+        with open(self.pickle_output_path, 'wb') as f:  
+            pickle.dump(temporal_dict,f, protocol=pickle.HIGHEST_PROTOCOL)
+        
+    def test_step(self, batch, batch_idx):
+        with open(self.pickle_output_path, 'rb') as f:  
+            temporal_dict=pickle.load(f)
+        # Tensor(N,E), list, Tensor(N), array, list
+        audios, captions, audio_ids, indexs, audio_names = batch
+        data_size = self.config.data.val_datasets_size
+        audio_embeds, caption_embeds = self.model(audios, captions)
+        if temporal_dict['audio_embs'] is None:
+            temporal_dict['audio_embs'] = np.zeros((data_size, audio_embeds.shape[1]))
+            temporal_dict['cap_embs'] = np.zeros((data_size, caption_embeds.shape[1]))
+            # if self.return_ranks:
+            #     Task.audio_names_ = np.array([None for i in range(data_size)], dtype=object)
+            #     Task.caption_names = np.array([None for i in range(data_size)], dtype=object)
+        temporal_dict['audio_embs'][indexs] = audio_embeds.cpu().numpy()
+        temporal_dict['cap_embs'][indexs] = caption_embeds.cpu().numpy()
+
+        with open(self.pickle_output_path, 'wb') as f:  
+            pickle.dump(temporal_dict,f, protocol=pickle.HIGHEST_PROTOCOL)
+    
+    def on_test_end(self):
+        with open(self.pickle_output_path, 'rb') as f:  
+            temporal_dict=pickle.load(f)
+        r1, r5, r10, mAP10, medr, meanr = t2a(temporal_dict['auido_embs'], temporal_dict['cap_embs'])
+        self.logger.experiment.add_scalars('metric',{'r1':r1, 'r5':r5, 'r10':r10, 'mAP10':mAP10, 'medr':medr, 'meanr':meanr},self.current_epoch)

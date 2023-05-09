@@ -105,11 +105,19 @@ if __name__ == '__main__':
         reload_dataloaders_every_n_epochs=1,
         accumulate_grad_batches=1,
         log_every_n_steps=1,
-        gpus=(torch.cuda.device_count(),1)
+        devices=(torch.cuda.device_count(),1)
         )
     
     trainer.fit(model=Task, train_dataloaders=train_loader, val_dataloaders=val_loader)
-    # trainer.test(model=Task, dataloaders=test_loader)
+    
+    # Batch Size 12 for Testing.
+    config.data.batch_size=12
+    test_loader = get_dataloader('test', config)
+    trainer = Trainer(
+        logger=TensorBoardLogger(save_dir=config.log_output_dir),
+        gpus=1
+        )
+    trainer.test(model=Task, dataloaders=test_loader)
 
 
 
