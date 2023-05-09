@@ -137,7 +137,7 @@ class Task(pl.LightningModule):
         
         loss = self.criterion(audio_embeds, caption_embeds, audio_ids)
         self.log('validation_loss', loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
-
+        self.logger.experiment.add_scalar('loss/val_loss',loss,self.current_epoch)
         self.audio_embs[indexs] = audio_embeds.cpu().numpy()
         self.cap_embs[indexs] = caption_embeds.cpu().numpy()
 
@@ -148,7 +148,7 @@ class Task(pl.LightningModule):
     
     def on_validation_epoch_end(self):
         r1, r5, r10, mAP10, medr, meanr = t2a(self.audio_embs, self.cap_embs)
-        self.logger.experiment.add_scalars('val_metric',{'r1':r1, 'r5':r5, 'r10':r10, 'mAP10':mAP10, 'medr':medr, 'meanr':meanr})
+        self.logger.experiment.add_scalars('val_metric',{'r1':r1, 'r5':r5, 'r10':r10, 'mAP10':mAP10, 'medr':medr, 'meanr':meanr},self.current_epoch)
 
     # def on_test_start(self):
     #     self.on_validation_start()
