@@ -111,7 +111,7 @@ if __name__ == '__main__':
     
     # Batch Size 12 for Testing.
     config.data.batch_size=12
-    test_loader = get_dataloader('test', config)
+    test_loader = get_dataloader('val', config)
     trainer = Trainer(
         logger=TensorBoardLogger(save_dir=config.log_output_dir),
         gpus=1
