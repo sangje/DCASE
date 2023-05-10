@@ -88,7 +88,7 @@ if __name__ == '__main__':
     train_model=Task(config)
 
     # Checkpoint and LR Monitoring
-    checkpoint_callback = ModelCheckpoint(monitor='validation_loss',
+    checkpoint_callback = ModelCheckpoint(monitor='validation_epoch_loss',
         filename="best_checkpoint", dirpath=config.model_output_dir)
     lr_monitor = LearningRateMonitor(logging_interval='step')
 

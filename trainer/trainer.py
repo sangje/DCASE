@@ -31,10 +31,11 @@ class Task(pl.LightningModule):
         self.validate_step_outputs = []
 
         #Print SubModules of Task
-        summary(self.model.audio_enc)
-        summary(self.model.audio_linear)
-        summary(self.model.text_enc)
-        summary(self.model.text_linear)
+        if self.local_rank==0:
+            summary(self.model.audio_enc)
+            summary(self.model.audio_linear)
+            summary(self.model.text_enc)
+            summary(self.model.text_linear)
 
         # #Set-up for CSV file
         # if config.training.csv:
@@ -114,6 +115,7 @@ class Task(pl.LightningModule):
     def on_train_epoch_end(self):
         avg_loss = torch.stack(self.train_step_outputs).mean()
         self.log('train_epoch_loss', avg_loss, on_step=False, on_epoch=True, prog_bar=True, logger=True)
+        self.train_step_outputs.clear()
 
     def configure_optimizers(self):
         # set up optimizer
@@ -145,6 +147,7 @@ class Task(pl.LightningModule):
     def on_validation_epoch_end(self):
         avg_loss = torch.stack(self.validate_step_outputs).mean()
         self.log('validation_epoch_loss', avg_loss, on_step=False, on_epoch=True, prog_bar=True, logger=True)
+        self.validate_step_outputs.clear()
 
     # def on_test_start(self):
     #     self.on_validation_start()
