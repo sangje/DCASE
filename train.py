@@ -89,7 +89,7 @@ if __name__ == '__main__':
 
     # Checkpoint and LR Monitoring
     checkpoint_callback = ModelCheckpoint(monitor='validation_loss',
-        filename={"best_checkpoint"}, dirpath=config.model_output_dir)
+        filename="best_checkpoint", dirpath=config.model_output_dir)
     lr_monitor = LearningRateMonitor(logging_interval='step')
 
     ddp_strategy = DDPStrategy(find_unused_parameters=True)
