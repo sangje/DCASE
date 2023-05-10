@@ -56,7 +56,7 @@ class InfoNCE(nn.Module):
 
     def forward(self, audio_embs, caption_embs, labels, negative_keys=None):
         n=audio_embs.shape[0]
-        similarity_matrix=util.cos_sim(audio_embs,caption_embs)
+        similarity_matrix=(util.cos_sim(audio_embs,caption_embs)+1)/2 # Make Similarity range [0,1] like probability
         label_matrix=labels.expand(n,n).eq(labels.expand(n,n).t()).float()
 
         return info_nce(similarity_matrix, label_matrix, negative_keys,

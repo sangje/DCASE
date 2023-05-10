@@ -9,7 +9,7 @@ from torchinfo import summary
 #from pprint import PrettyPrinter
 #from torch.utils.tensorboard import SummaryWriter
 from tools.utils import setup_seed, AverageMeter, a2t, t2a
-from tools.loss import BiDirectionalRankingLoss, TripletLoss, NTXent
+from tools.loss import BiDirectionalRankingLoss, TripletLoss, NTXent, VICReg
 from tools.info_loss import InFoNCELoss
 from tools.make_csvfile import make_csv
 import pickle
@@ -85,6 +85,9 @@ class Task(pl.LightningModule):
             
         elif config.training.loss == 'infonce':
             self.criterion = InFoNCELoss()
+
+        elif config.training.loss == 'infonce+vicreg':
+            self.criterion = VICReg()
             
         else: #config.training.loss == 'bidirect': 'contrastive'??
             self.criterion = BiDirectionalRankingLoss(margin=config.training.margin)
