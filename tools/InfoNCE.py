@@ -1,6 +1,7 @@
 import torch
 import torch.nn.functional as F
 from torch import nn
+from sentence_transformers import util
 
 __all__ = ['InfoNCE', 'info_nce']
 
@@ -53,8 +54,12 @@ class InfoNCE(nn.Module):
         self.reduction = reduction
         self.negative_mode = negative_mode
 
-    def forward(self, query, positive_key, negative_keys=None):
-        return info_nce(query, positive_key, negative_keys,
+    def forward(self, audio_embs, caption_embs, labels, negative_keys=None):
+        n=audio_embs.shape[0]
+        similarity_matrix=util.cos_sim(audio_embs,caption_embs)
+        label_matrix=labels.expand(n,n).eq(labels.expand(n,n).t()).float()
+
+        return info_nce(similarity_matrix, label_matrix, negative_keys,
                         temperature=self.temperature,
                         reduction=self.reduction,
                         negative_mode=self.negative_mode)

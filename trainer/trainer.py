@@ -105,8 +105,13 @@ class Task(pl.LightningModule):
         audio_embeds, caption_embeds = self.model(audios, captions)
 
         loss = self.criterion(audio_embeds, caption_embeds, audio_ids)
-        self.log('train_loss',loss, on_step=False, on_epoch=True, prog_bar=True, logger=True)
+        self.log('train_step_loss',loss, on_step=True, on_epoch=False, prog_bar=True, logger=True)
+        self.logger.experiment.add_scalars('loss/train_loss',{'train_loss':loss},self.current_epoch)
         return loss
+    
+    def training_epoch_end(self, outputs):
+        avg_loss = torch.stack([x['train_loss'] for x in outputs]).mean()
+        self.log('train_epoch_loss', avg_loss, on_step=False, on_epoch=True, prog_bar=True, logger=True)
 
     def configure_optimizers(self):
         # set up optimizer
@@ -131,8 +136,12 @@ class Task(pl.LightningModule):
             #     Task.caption_names = np.array([None for i in range(data_size)], dtype=object)
         
         loss = self.criterion(audio_embeds, caption_embeds, audio_ids)
-        self.log('validation_loss', loss, on_step=False, on_epoch=True, prog_bar=True, logger=True)
+        self.log('validation_step_loss', loss, on_step=True, on_epoch=False, prog_bar=True, logger=True)
         return loss
+    
+    def validation_epoch_end(self, outputs):
+        avg_loss = torch.stack([x['val_loss'] for x in outputs]).mean()
+        self.log('validation_epoch_loss', avg_loss, on_step=False, on_epoch=True, prog_bar=True, logger=True)
 
     # def on_test_start(self):
     #     self.on_validation_start()
