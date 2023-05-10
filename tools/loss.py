@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from sentence_transformers import util
 import torch.nn.functional as F
-from tools.info_loss import InFoNCELoss
+from tools.InfoNCE import infoNCE
 
 
 # class InFoNCELoss(nn.Module):
@@ -216,7 +216,7 @@ class VICReg(nn.Module):
         self.inv_weight = inv_weight
         self.var_weight = var_weight
         self.cov_weight = cov_weight
-        self.infonce = InFoNCELoss()
+        self.infonce = infoNCE()
 
 
     def forward(self, audio_embs, caption_embs, labels):
