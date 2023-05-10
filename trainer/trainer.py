@@ -31,7 +31,10 @@ class Task(pl.LightningModule):
         self.validate_step_outputs = []
 
         #Print SubModules of Task
-        if self.local_rank==0:
+        if torch.distributed.is_initialized() and torch.distributed.get_rank() != 0:
+            # do nothing, only run on main process
+            None
+        else:
             summary(self.model.audio_enc)
             summary(self.model.audio_linear)
             summary(self.model.text_enc)
@@ -124,7 +127,7 @@ class Task(pl.LightningModule):
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer,'min',factor=0.5,patience=5,threshold=0.005,threshold_mode='abs',min_lr=0.000001,verbose=True)
         return {"optimizer":optimizer, 
                 "lr_scheduler":{"scheduler":scheduler,
-                                "monitor": 'validation_step_loss',
+                                "monitor": 'validation_epoch_loss',
                                 "frequency": 1}}
 
     # def on_validation_start(self):
