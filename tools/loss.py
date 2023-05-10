@@ -215,7 +215,7 @@ class VICReg(nn.Module):
         self.inv_weight = inv_weight
         self.var_weight = var_weight
         self.cov_weight = cov_weight
-        self.infonce = infoNCE()
+        self.infonce = InfoNCE()
 
 
     def forward(self, audio_embs, caption_embs, labels):
