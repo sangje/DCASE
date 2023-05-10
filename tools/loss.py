@@ -2,8 +2,7 @@ import torch
 import torch.nn as nn
 from sentence_transformers import util
 import torch.nn.functional as F
-from tools.InfoNCE import infoNCE
-
+from tools.InfoNCE import InfoNCE
 
 # class InFoNCELoss(nn.Module):
     

@@ -10,7 +10,7 @@ from torchinfo import summary
 #from torch.utils.tensorboard import SummaryWriter
 from tools.utils import setup_seed, AverageMeter, a2t, t2a
 from tools.loss import BiDirectionalRankingLoss, TripletLoss, NTXent, VICReg
-from tools.info_loss import InFoNCELoss
+from tools.InfoNCE import InfoNCE
 from tools.make_csvfile import make_csv
 import pickle
 
@@ -84,7 +84,7 @@ class Task(pl.LightningModule):
             self.criterion = WeightTriplet(margin=config.training.margin)
             
         elif config.training.loss == 'infonce':
-            self.criterion = InFoNCELoss()
+            self.criterion = InfoNCE()
 
         elif config.training.loss == 'infonce+vicreg':
             self.criterion = VICReg()
