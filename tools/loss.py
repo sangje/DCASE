@@ -247,4 +247,4 @@ class VICReg(nn.Module):
         loss += self.var_weight * var_loss
         loss += self.cov_weight * cov_loss
         loss2 = self.infonce(audio_embs,caption_embs,labels)
-        return loss + loss2
+        return 0.5*loss + 0.5*loss2
