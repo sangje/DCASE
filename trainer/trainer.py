@@ -109,7 +109,7 @@ class Task(pl.LightningModule):
         self.logger.experiment.add_scalars('loss/train_loss',{'train_loss':loss},self.current_epoch)
         return loss
     
-    def training_epoch_end(self, outputs):
+    def on_train_epoch_end(self, outputs):
         avg_loss = torch.stack([x['train_loss'] for x in outputs]).mean()
         self.log('train_epoch_loss', avg_loss, on_step=False, on_epoch=True, prog_bar=True, logger=True)
 
@@ -139,7 +139,7 @@ class Task(pl.LightningModule):
         self.log('validation_step_loss', loss, on_step=True, on_epoch=False, prog_bar=True, logger=True)
         return loss
     
-    def validation_epoch_end(self, outputs):
+    def on_validation_epoch_end(self, outputs):
         avg_loss = torch.stack([x['val_loss'] for x in outputs]).mean()
         self.log('validation_epoch_loss', avg_loss, on_step=False, on_epoch=True, prog_bar=True, logger=True)
 
