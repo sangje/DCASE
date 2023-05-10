@@ -27,6 +27,8 @@ class Task(pl.LightningModule):
         self.model = ASE(config)
         # self.return_ranks = config.training.csv
         self.pickle_output_path=Path(config.pickle_output_dir,'temporal_embeddings.pkl')
+        self.train_step_outputs = []
+        self.validate_step_outputs = []
 
         #Print SubModules of Task
         summary(self.model.audio_enc)
@@ -106,11 +108,11 @@ class Task(pl.LightningModule):
 
         loss = self.criterion(audio_embeds, caption_embeds, audio_ids)
         self.log('train_step_loss',loss, on_step=True, on_epoch=False, prog_bar=True, logger=True)
-        self.logger.experiment.add_scalars('loss/train_loss',{'train_loss':loss},self.current_epoch)
+        self.train_step_outputs.append(loss)
         return loss
     
-    def on_train_epoch_end(self, outputs):
-        avg_loss = torch.stack([x['train_loss'] for x in outputs]).mean()
+    def on_train_epoch_end(self):
+        avg_loss = torch.stack(self.train_step_outputs).mean()
         self.log('train_epoch_loss', avg_loss, on_step=False, on_epoch=True, prog_bar=True, logger=True)
 
     def configure_optimizers(self):
@@ -137,10 +139,11 @@ class Task(pl.LightningModule):
         
         loss = self.criterion(audio_embeds, caption_embeds, audio_ids)
         self.log('validation_step_loss', loss, on_step=True, on_epoch=False, prog_bar=True, logger=True)
+        self.validate_step_outputs.append(loss)
         return loss
     
-    def on_validation_epoch_end(self, outputs):
-        avg_loss = torch.stack([x['val_loss'] for x in outputs]).mean()
+    def on_validation_epoch_end(self):
+        avg_loss = torch.stack(self.validate_step_outputs).mean()
         self.log('validation_epoch_loss', avg_loss, on_step=False, on_epoch=True, prog_bar=True, logger=True)
 
     # def on_test_start(self):
