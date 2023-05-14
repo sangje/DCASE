@@ -88,7 +88,7 @@ class Task(pl.LightningModule):
             self.criterion = InfoNCE()
 
         elif config.training.loss == 'infonce+vicreg':
-            self.criterion = InfoNCE_VICReg()
+            self.criterion = InfoNCE_VICReg(info_weight=1,vic_weight=0.4)
             
         else: #config.training.loss == 'bidirect': 'contrastive'??
             self.criterion = BiDirectionalRankingLoss(margin=config.training.margin)
