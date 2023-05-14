@@ -2,25 +2,6 @@ import torch
 import torch.nn as nn
 from sentence_transformers import util
 import torch.nn.functional as F
-from tools.InfoNCE import InfoNCE
-
-# class InFoNCELoss(nn.Module):
-    
-#     def __init__(self, temperature):
-#         super(InFoNCELoss, self).__init__()
-        
-#         self.tau = temperature
-    
-#     def forward(self, audio_embeds, text_embeds, labels):
-#         """
-#         :param audio_embeds: tensor, (N,E)
-#         :param text_embeds
-#         :param labels(item_batch) # audio-text info
-#         :return:
-#         """
-#         n = audio_embeds.size(0) # 배치 사이즈
-
-
 
 class NTXent(nn.Module):
 
@@ -215,8 +196,6 @@ class VICReg(nn.Module):
         self.inv_weight = inv_weight
         self.var_weight = var_weight
         self.cov_weight = cov_weight
-        self.infonce = InfoNCE()
-
 
     def forward(self, audio_embs, caption_embs, labels):
         
@@ -246,5 +225,48 @@ class VICReg(nn.Module):
         loss = self.inv_weight * inv_loss
         loss += self.var_weight * var_loss
         loss += self.cov_weight * cov_loss
-        loss2 = self.infonce(audio_embs,caption_embs,labels)
-        return 0.5*loss + 0.5*loss2
+        return loss
+    
+
+class InfoNCE(nn.Module):
+    
+    def __init__(self, temperature=0.07):
+        super(InfoNCE, self).__init__()
+        
+        self.tau = temperature
+    
+    def forward(self, audio_embeds, text_embeds, labels):
+        """
+        :param audio_embeds: tensor, (N,E)
+        :param text_embeds
+        :param labels(item_batch) # audio-text info
+        :return:
+        """
+        n = audio_embeds.size(0) # 배치 사이즈
+
+        similarity_matrix = util.cos_sim(audio_embeds,text_embeds)
+
+        similarity_prob_matrix = F.log_softmax(similarity_matrix.exp()/self.tau,dim=-1)
+
+        loss = - similarity_prob_matrix.diag().sum()
+
+        return loss / n
+
+
+
+class InfoNCE_VICReg(nn.Module):
+    
+    def __init__(self, info_weight=1, vic_weight=0.1):
+        super(InfoNCE_VICReg, self).__init__()
+        
+        self.info_weight= info_weight
+        self.vic_weight = vic_weight
+        self.InfoNCE = InfoNCE()
+        self.VICReg = VICReg()
+
+    def forward(self, audio_embeds, text_embeds, labels):
+        
+        loss1 = self.InfoNCE(audio_embeds, text_embeds)
+        loss2 = self.VICReg(audio_embeds, text_embeds)
+
+        return self.info_weight * loss1 + self.vic_weight * loss2
