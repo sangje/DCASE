@@ -7,12 +7,9 @@ from trainer.trainer import Task
 from tools.config_loader import get_config
 from pathlib import Path
 from data_handling.DataLoader import get_dataloader
-# from tools.make_csvfile import make_csv
 
 from lightning.pytorch import LightningModule, Trainer, seed_everything
-from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint
-from lightning.pytorch.strategies import DDPStrategy
-from lightning.pytorch.loggers import TensorBoardLogger
+
 
 if __name__ == '__main__':
     os.environ['TOKENIZERS_PARALLELISM'] = 'false'
@@ -89,4 +86,4 @@ if __name__ == '__main__':
             devices=1
         )
     
-    trainer.test(model=eval_model, dataloaders=eval_loader)
+    trainer.predict(model=eval_model, dataloaders=eval_loader)
