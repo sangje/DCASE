@@ -124,64 +124,65 @@ class BiDirectionalRankingLoss(nn.Module):
 
 
 
-# class WeightTriplet(nn.Module): #코드 이상함 이거
-#     """
-#     Compute contrastive loss
-#     """
+class WeightTriplet(nn.Module): #코드 이상함 이거
+    """
+    Compute contrastive loss
+    """
 
-#     def __init__(self, margin=0.2):
-#         super(WeightTriplet, self).__init__()
-#         self.margin = margin
+    def __init__(self, margin=0.2):
+        super(WeightTriplet, self).__init__()
+        self.margin = margin
 
-#     def polyloss(self, sim_mat, label):
-#         epsilon = 1e-5
-#         size = sim_mat.size(0)
-#         hh = sim_mat.t()
+    def polyloss(self, sim_mat, label):
+        epsilon = 1e-5
+        size = sim_mat.size(0)
+        hh = sim_mat.t()
 
-#         loss = list()
-#         for i in range(size):
-#             pos_pair_ = sim_mat[i][i]
-#             pos_pair_ = pos_pair_[pos_pair_ < 1 - epsilon]
-#             neg_pair_ = sim_mat[i][label != label[i]]
+        loss = list()
+        for i in range(size):
+            pos_pair_ = sim_mat[i][i]
+            pos_pair_ = pos_pair_[pos_pair_ < 1 - epsilon]
+            neg_pair_ = sim_mat[i][label != label[i]]
 
-#             neg_pair = neg_pair_[neg_pair_ + self.margin > min(pos_pair_)]
+            neg_pair = neg_pair_[neg_pair_ + self.margin > min(pos_pair_)]
 
-#             pos_pair = pos_pair_
-#             if len(neg_pair) < 1 or len(pos_pair) < 1:
-#                 continue
+            pos_pair = pos_pair_
+            if len(neg_pair) < 1 or len(pos_pair) < 1:
+                continue
 
-#             pos_loss = torch.clamp(0.2 * torch.pow(pos_pair, 2) - 0.7 * pos_pair + 0.5, min=0)
-#             neg_pair = max(neg_pair)
-#             neg_loss = torch.clamp(0.9 * torch.pow(neg_pair, 2) - 0.4 * neg_pair + 0.03, min=0)
+            pos_loss = torch.clamp(0.2 * torch.pow(pos_pair, 2) - 0.7 * pos_pair + 0.5, min=0)
+            neg_pair = max(neg_pair)
+            neg_loss = torch.clamp(0.9 * torch.pow(neg_pair, 2) - 0.4 * neg_pair + 0.03, min=0)
 
-#             loss.append(pos_loss + neg_loss)
-#         for i in range(size):
-#             pos_pair_ = hh[i][i]
-#             pos_pair_ = pos_pair_[pos_pair_ < 1 - epsilon]
-#             neg_pair_ = hh[i][label != label[i]]
+            loss.append(pos_loss + neg_loss)
+        for i in range(size):
+            pos_pair_ = hh[i][i]
+            pos_pair_ = pos_pair_[pos_pair_ < 1 - epsilon]
+            neg_pair_ = hh[i][label != label[i]]
 
-#             neg_pair = neg_pair_[neg_pair_ + self.margin > min(pos_pair_)]
+            neg_pair = neg_pair_[neg_pair_ + self.margin > min(pos_pair_)]
 
-#             pos_pair = pos_pair_
-#             if len(neg_pair) < 1 or len(pos_pair) < 1:
-#                 continue
-#             pos_loss = torch.clamp(0.2 * torch.pow(pos_pair, 2) - 0.7 * pos_pair + 0.5, min=0)
+            pos_pair = pos_pair_
+            if len(neg_pair) < 1 or len(pos_pair) < 1:
+                continue
+            pos_loss = torch.clamp(0.2 * torch.pow(pos_pair, 2) - 0.7 * pos_pair + 0.5, min=0)
 
-#             neg_pair = max(neg_pair)
-#             neg_loss = torch.clamp(0.9 * torch.pow(neg_pair, 2) - 0.4 * neg_pair + 0.03, min=0)
-#             loss.append(pos_loss + neg_loss)
+            neg_pair = max(neg_pair)
+            neg_loss = torch.clamp(0.9 * torch.pow(neg_pair, 2) - 0.4 * neg_pair + 0.03, min=0)
+            loss.append(pos_loss + neg_loss)
 
-#         if len(loss) == 0:
-#             return torch.zeros([], requires_grad=True)
+        if len(loss) == 0:
+            return torch.zeros([], requires_grad=True)
 
-#         loss = sum(loss) / size
-#         return loss
+        loss = sum(loss) / size
+        return loss
 
-#     def forward(self, audio_embeds, text_embeds, labels):
-#         # compute image-sentence score matrix
-#         scores = util.cos_sim(audio_embeds, text_embeds)
-#         loss = self.polyloss(scores, labels)
-#         return loss
+    def forward(self, audio_embeds, text_embeds, labels):
+        # compute image-sentence score matrix
+        scores = util.cos_sim(audio_embeds, text_embeds)
+        loss = self.polyloss(scores, labels)
+        return loss
+    
 
 class VICReg(nn.Module):
 
@@ -265,7 +266,7 @@ class InfoNCE_VICReg(nn.Module):
         self.VICReg = VICReg()
 
     def forward(self, audio_embeds, text_embeds, labels):
-        
+
         loss1 = self.InfoNCE(audio_embeds, text_embeds)
         loss2 = self.VICReg(audio_embeds, text_embeds)
 
