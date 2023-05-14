@@ -257,7 +257,7 @@ class InfoNCE(nn.Module):
 
 class InfoNCE_VICReg(nn.Module):
     
-    def __init__(self, info_weight=1, vic_weight=0.1):
+    def __init__(self, info_weight=1, vic_weight=1):
         super(InfoNCE_VICReg, self).__init__()
         
         self.info_weight= info_weight
