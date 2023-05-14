@@ -198,7 +198,7 @@ class VICReg(nn.Module):
         self.var_weight = var_weight
         self.cov_weight = cov_weight
 
-    def forward(self, audio_embs, caption_embs, labels):
+    def forward(self, audio_embs, caption_embs, labels=None):
         
         Z_a, Z_b = audio_embs, caption_embs
 
@@ -236,7 +236,7 @@ class InfoNCE(nn.Module):
         
         self.tau = temperature
     
-    def forward(self, audio_embeds, text_embeds, labels):
+    def forward(self, audio_embeds, text_embeds, labels=None):
         """
         :param audio_embeds: tensor, (N,E)
         :param text_embeds
@@ -265,7 +265,7 @@ class InfoNCE_VICReg(nn.Module):
         self.InfoNCE = InfoNCE()
         self.VICReg = VICReg()
 
-    def forward(self, audio_embeds, text_embeds, labels):
+    def forward(self, audio_embeds, text_embeds, labels=None):
 
         loss1 = self.InfoNCE(audio_embeds, text_embeds)
         loss2 = self.VICReg(audio_embeds, text_embeds)
