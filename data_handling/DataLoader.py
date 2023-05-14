@@ -27,22 +27,25 @@ class AudioCaptionDataset(Dataset):
         self.dataset = dataset
         self.split = split
         self.h5_path = f'data/{dataset}/hdf5s/{split}/{split}.h5'
-        if dataset == 'AudioCaps' and split == 'train':
-            self.is_train = True
+        # if dataset == 'AudioCaps' and split == 'train':
+        #     self.is_train = True
+        #     self.num_captions_per_audio = 1
+        #     with h5py.File(self.h5_path, 'r') as hf:
+        #         self.audio_keys = [audio_name.decode() for audio_name in hf['audio_name'][:]]
+        #         # audio_names: [str]
+        #         self.captions = [caption.decode() for caption in hf['caption'][:]]
+        # else: #'Clotho'
+        self.is_train = False
+        if split == 'eval':
             self.num_captions_per_audio = 1
-            with h5py.File(self.h5_path, 'r') as hf:
-                self.audio_keys = [audio_name.decode() for audio_name in hf['audio_name'][:]]
-                # audio_names: [str]
-                self.captions = [caption.decode() for caption in hf['caption'][:]]
-        else: #'Clotho'
-            self.is_train = False
+        else:
             self.num_captions_per_audio = 5
-            with h5py.File(self.h5_path, 'r') as hf:
-                self.audio_keys = [audio_name.decode() for audio_name in hf['audio_name'][:]]
-                self.captions = [caption for caption in hf['caption'][:]]
-                if dataset == 'Clotho':
-                    self.audio_lengths = [length for length in hf['audio_length'][:]]
-                # [cap_1, cap_2, ..., cap_5]
+
+        with h5py.File(self.h5_path, 'r') as hf:
+            self.audio_keys = [audio_name.decode() for audio_name in hf['audio_name'][:]]
+            self.captions = [caption for caption in hf['caption'][:]]
+            self.audio_lengths = [length for length in hf['audio_length'][:]]
+            # [cap_1, cap_2, ..., cap_5]
 
     def __len__(self):
         return len(self.audio_keys) * self.num_captions_per_audio
@@ -54,18 +57,17 @@ class AudioCaptionDataset(Dataset):
         with h5py.File(self.h5_path, 'r') as hf:
             waveform = hf['waveform'][audio_idx]
 
-        if self.dataset == 'AudioCaps' and self.is_train:
-            caption = self.captions[audio_idx]
-        else:
+        if self.split != 'eval':
             captions = self.captions[audio_idx]
             cap_idx = index % self.num_captions_per_audio
             caption = captions[cap_idx].decode()
-
-        if self.dataset == 'Clotho':
-            length = self.audio_lengths[audio_idx]
-            return waveform, caption, audio_idx, length, index, audio_name
         else:
-            return waveform, caption, audio_idx, len(waveform), index
+            caption = self.captions[audio_idx]
+
+
+        length = self.audio_lengths[audio_idx]
+        return waveform, caption, audio_idx, length, index, audio_name
+
 
 
 def collate_fn(batch_data):
