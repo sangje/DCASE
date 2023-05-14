@@ -92,7 +92,7 @@ if __name__ == '__main__':
         filename="best_checkpoint", dirpath=config.model_output_dir)
     lr_monitor = LearningRateMonitor(logging_interval='step')
 
-    ddp_strategy = DDPStrategy(find_unused_parameters=True)
+    ddp_strategy = DDPStrategy(find_unused_parameters=False)
 
     trainer = Trainer(
         logger=TensorBoardLogger(save_dir=config.log_output_dir),
