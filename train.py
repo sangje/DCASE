@@ -64,11 +64,12 @@ if __name__ == '__main__':
     config.model_output_dir = Path('outputs', folder_name, 'models')
     config.log_output_dir = Path('outputs', folder_name, 'logging')
     config.pickle_output_dir = Path('outputs', folder_name, 'pickle')
+    config.csv_output_dir = Path('outputs', folder_name, 'csv')
     config.folder_name = folder_name
     config.log_output_dir.mkdir(parents=True, exist_ok=True)
     config.model_output_dir.mkdir(parents=True, exist_ok=True)
     config.pickle_output_dir.mkdir(parents=True, exist_ok=True)
-
+    
 
     # if config.training.csv:
     #     config.csv_output_dir = Path('outputs', config.folder_name, 'csv')
