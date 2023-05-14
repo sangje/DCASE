@@ -61,12 +61,11 @@ if __name__ == '__main__':
                     'seed_{}'.format(config.exp_name, str(config.training.freeze),
                                                 config.training.lr,
                                                 config.training.seed)
-    config.model_output_dir = Path('outputs', folder_name, 'models')
-    config.log_output_dir = Path('outputs', folder_name, 'logging')
+    config.csv_output_dir = Path('outputs', folder_name, 'csv')
     config.pickle_output_dir = Path('outputs', folder_name, 'pickle')
+    config.model_output_dir = Path('outputs', folder_name, 'models')
     config.folder_name = folder_name
-    config.log_output_dir.mkdir(parents=True, exist_ok=True)
-    config.model_output_dir.mkdir(parents=True, exist_ok=True)
+    config.csv_output_dir.mkdir(parents=True, exist_ok=True)
     config.pickle_output_dir.mkdir(parents=True, exist_ok=True)
 
 
@@ -75,52 +74,19 @@ if __name__ == '__main__':
     #     config.csv_output_dir.mkdir(parents=True, exist_ok=True)
 
     # set up data loaders
-    train_loader = get_dataloader('train', config)
-    val_loader = get_dataloader('val', config)
-    # test_loader = get_dataloader('test', config)
-    config.data.val_datasets_size = len(val_loader.dataset)
-    # config.data.test_datasets_size = len(test_loader.dataset)
-    print(f'Size of training set: {len(train_loader.dataset)}, size of batches: {len(train_loader)}')
-    print(f'Size of validation set: {len(val_loader.dataset)}, size of batches: {len(val_loader)}')
-    # print(f'Size of test set: {len(test_loader.dataset)}, size of batches: {len(test_loader)}')
+    eval_loader = get_dataloader('eval', config)
+
+    config.data.eval_datasets_size = len(eval_loader.dataset)
+    print(f'Size of validation set: {len(eval_loader.dataset)}, size of batches: {len(eval_loader)}')
     
     # Model Defined
-    train_model=Task(config)
-
-    # Checkpoint and LR Monitoring
-    checkpoint_callback = ModelCheckpoint(monitor='validation_epoch_loss',
-        filename="best_checkpoint", dirpath=config.model_output_dir)
-    lr_monitor = LearningRateMonitor(logging_interval='step')
-
-    ddp_strategy = DDPStrategy(find_unused_parameters=False)
+    eval_model=Task(config)
+    checkpoint = torch.load(Path(config.model_output_dir,"best_checkpoint.ckpt"))
+    eval_model.load_state_dict(checkpoint['state_dict'])
 
     trainer = Trainer(
-        logger=TensorBoardLogger(save_dir=config.log_output_dir),
-        max_epochs=config.training.epochs,
-        strategy=ddp_strategy,
-        num_sanity_val_steps=-1,
-        sync_batchnorm=True,
-        callbacks=[checkpoint_callback, lr_monitor],
-        default_root_dir=config.log_output_dir,
-        reload_dataloaders_every_n_epochs=1,
-        accumulate_grad_batches=1,
-        log_every_n_steps=1,
-        )
-    
-    trainer.fit(model=train_model, train_dataloaders=train_loader, val_dataloaders=val_loader)
-    
-
-    torch.distributed.destroy_process_group()
-    if trainer.is_global_zero:
-        # Batch Size 12 for Testing.
-        config.data.batch_size=12
-        test_loader = get_dataloader('val', config)
-        trainer = Trainer(
-            logger=TensorBoardLogger(save_dir=config.log_output_dir),
             accelerator="gpu",
             devices=1
         )
-        checkpoint = torch.load(Path(config.model_output_dir,"best_checkpoint.ckpt"))
-        test_model = Task(config)
-        test_model.load_state_dict(checkpoint['state_dict'])
-        trainer.test(model=test_model, dataloaders=test_loader)
+    
+    trainer.test(model=eval_model, dataloaders=eval_loader)

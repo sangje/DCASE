@@ -21,7 +21,7 @@ class AudioCaptionDataset(Dataset):
         load audio clip's waveform and corresponding caption
         Args:
             dataset: 'AudioCaps', 'Clotho
-            split: 'train', 'val', 'test'
+            split: 'train', 'val', 'eval'
         """
         super(AudioCaptionDataset, self).__init__()
         self.dataset = dataset

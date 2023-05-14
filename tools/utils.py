@@ -169,3 +169,25 @@ def t2a(audio_embs, cap_embs, return_ranks=False):
         return r1, r5, r10, mAP10, medr, meanr, ranks, top10
     else:
         return r1, r5, r10, mAP10, medr, meanr
+
+def t2a_retrieval(audio_embs, cap_embs, return_ranks=True):
+    # caption to audio retrieval
+    num_audios = int(audio_embs.shape[0])
+
+    audios = np.array([audio_embs[i]for i in range(num_audios)])
+
+    ranks = np.zeros(num_audios)
+    top10 = np.zeros([num_audios,10])
+
+    for index in range(num_audios):
+
+        # get query captions
+        query = cap_embs[index]
+
+        # queries @ audio.T
+        d = util.cos_sim(torch.Tensor(query), torch.Tensor(audios)).numpy()
+
+        inds = np.argsort(d[0])[::-1]
+        top10[index] = inds[0:10]
+
+    return top10

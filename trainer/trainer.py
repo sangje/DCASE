@@ -8,7 +8,7 @@ from torchinfo import summary
 #from loguru import logger
 #from pprint import PrettyPrinter
 #from torch.utils.tensorboard import SummaryWriter
-from tools.utils import setup_seed, AverageMeter, a2t, t2a
+from tools.utils import setup_seed, AverageMeter, a2t, t2a, t2a_retrieval
 from tools.loss import BiDirectionalRankingLoss, WeightTriplet, TripletLoss, NTXent, VICReg, InfoNCE, InfoNCE_VICReg
 from tools.make_csvfile import make_csv
 import pickle
@@ -26,9 +26,11 @@ class Task(pl.LightningModule):
         self.model = ASE(config)
         # self.return_ranks = config.training.csv
         self.pickle_output_path=Path(config.pickle_output_dir,'temporal_embeddings.pkl')
+        self.csv_pickle_output_path=Path(config.pickle_output_dir,'temporal_csv_embeddings.pkl')
+        self.csv_output_path=Path(config.csv_output_dir,'results.csv')
         self.train_step_outputs = []
         self.validate_step_outputs = []
-
+        
         #Print SubModules of Task
         if torch.distributed.is_initialized() and torch.distributed.get_rank() != 0:
             # do nothing, only run on main process
@@ -226,3 +228,38 @@ class Task(pl.LightningModule):
         r1, r5, r10, mAP10, medr, meanr = t2a(temporal_dict['audio_embs'], temporal_dict['cap_embs'])
         print(f'r1:{r1}, r5:{r5}, r10:{r10}, mAP10:{mAP10}')
         self.logger.experiment.add_scalars('metric',{'r1':r1, 'r5':r5, 'r10':r10, 'mAP10':mAP10, 'medr':medr, 'meanr':meanr},self.current_epoch)
+
+
+
+    def on_predict_start(self):
+        temporal_dict={'audio_embs':None, 'cap_embs':None, 'audio_names_':None, 'caption_names':None}
+        with open(self.csv_pickle_output_path, 'wb') as f:  
+            pickle.dump(temporal_dict,f, protocol=pickle.HIGHEST_PROTOCOL)
+        
+    def predict_step(self, batch, batch_idx):
+        with open(self.csv_pickle_output_path, 'rb') as f:  
+            temporal_dict=pickle.load(f)
+        # Tensor(N,E), list, Tensor(N), array, list
+        audios, captions, audio_ids, indexs, audio_names = batch
+        data_size = self.config.data.eval_datasets_size
+        audio_embeds, caption_embeds = self.model(audios, captions)
+        if temporal_dict['audio_embs'] is None:
+            temporal_dict['audio_embs'] = np.zeros((data_size, audio_embeds.shape[1]))
+            temporal_dict['cap_embs'] = np.zeros((data_size, caption_embeds.shape[1]))
+            # if self.return_ranks:
+            temporal_dict['audio_names_'] = np.array([None for i in range(data_size)], dtype=object)
+            temporal_dict['caption_names'] = np.array([None for i in range(data_size)], dtype=object)
+        temporal_dict['audio_embs'][indexs] = audio_embeds.cpu().numpy()
+        temporal_dict['cap_embs'][indexs] = caption_embeds.cpu().numpy()
+        temporal_dict['audio_names_'][indexs] = np.array(audio_names)
+        temporal_dict['caption_names'][indexs] = np.array(captions)
+
+        with open(self.csv_pickle_output_path, 'wb') as f:  
+            pickle.dump(temporal_dict,f, protocol=pickle.HIGHEST_PROTOCOL)
+    
+    def on_predict_end(self):
+        with open(self.csv_pickle_output_path, 'rb') as f:  
+            temporal_dict=pickle.load(f)
+        top10 = t2a_retrieval(temporal_dict['audio_embs'], temporal_dict['cap_embs'],return_ranks=True)
+        make_csv(temporal_dict['caption_names'], temporal_dict['audio_names_'], top10, self.csv_output_path)
+
