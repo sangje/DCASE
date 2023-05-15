@@ -66,7 +66,7 @@ class AudioCaptionDataset(Dataset):
 
 
         length = self.audio_lengths[audio_idx]
-        return waveform, caption, audio_idx, length, index, audio_name
+        return waveform, caption.decode(), audio_idx, length, index, audio_name
 
 
 
