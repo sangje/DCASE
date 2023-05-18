@@ -1,4 +1,4 @@
-# On Metric Learning for Audio-Text Cross-Modal Retrieval
+# [<a href="https://dcase.community/challenge2023/task-language-based-audio-retrieval" target="_blank">2023 Dcase Challenge</a>] Text-to-Audio Retrieval: Ensemble combinations of the models.
 
 ## Set up environment
 
@@ -38,7 +38,7 @@
 
 ## Cite
 
-If you use our code, please kindly cite following:
+Our code was written based on :
 ```
 @article{Mei2022metric,
   title = {On Metric Learning for Audio-Text Cross-Modal Retrieval},
