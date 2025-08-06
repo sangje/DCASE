@@ -52,7 +52,7 @@ DCASE/
 
 ### 2. 데이터셋 준비
 
-*   **AudioCaps**: [AudioCaps 홈페이지](https://github.com/XinhaoMei/ACT)에서 다운로드할 수 있습니다.
+*   **AudioCaps**: [AudioCaps 홈페이지](https://audiocaps.github.io/)에서 다운로드할 수 있습니다.
 *   **Clotho**: [Zenodo](https://zenodo.org/record/4783391#.YkRHxTx5_kk)에서 다운로드할 수 있습니다.
 
 다운로드한 오디오 파일(`*.wav`)을 다음 구조에 맞게 `data` 디렉토리 내에 배치합니다.
